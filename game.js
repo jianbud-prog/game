@@ -1,26 +1,26 @@
 (() => {
   "use strict";
 
-  const SAVE_KEY = "mongle-egg-forest-save-v1";
-  const SAVE_VERSION = 1;
-  const HATCH_TIME_MS = 8_000;
-  const CHILD_XP = 35;
-  const ADULT_XP = 90;
-  const STAT_KEYS = ["fullness", "happiness", "cleanliness", "energy", "health"];
-  const CORE_STAT_KEYS = ["fullness", "happiness", "cleanliness", "energy"];
-  const STAGE_CLASSES = ["stage-egg", "stage-baby", "stage-child", "stage-adult"];
-  const FORM_CLASSES = ["form-balanced", "form-active", "form-cozy"];
-  const ACTION_CLASSES = ["action-feed", "action-clean", "action-heal", "action-play", "action-evolve"];
+  const SAVE_KEY = "cozy-little-garden-save-v2";
+  const SAVE_VERSION = 2;
+  const SPROUT_TIME_MS = 8_000;
+  const TREE_XP = 35;
+  const FLOWER_XP = 90;
+  const FRUIT_XP = 150;
+  const STAT_KEYS = ["water", "sunlight", "nutrients", "vitality", "health"];
+  const CORE_STAT_KEYS = ["water", "sunlight", "nutrients", "vitality"];
+  const STAGE_CLASSES = ["stage-seed", "stage-sprout", "stage-tree", "stage-flower", "stage-fruit"];
+  const FORM_CLASSES = ["form-balanced", "form-sunny", "form-dewy"];
+  const ACTION_CLASSES = ["action-water", "action-soil", "action-heal", "action-sun", "action-music", "action-evolve"];
 
   const el = (id) => document.getElementById(id);
   const dom = {
-    pet: el("pet"),
-    petName: el("petName"),
+    plant: el("pet"),
+    plantName: el("petName"),
     stageLabel: el("stageLabel"),
     ageLabel: el("ageLabel"),
     speechBubble: el("speechBubble"),
     speechText: el("speechText"),
-    sleepMarks: el("sleepMarks"),
     sickMark: el("sickMark"),
     moodOrb: el("moodOrb"),
     moodFace: el("moodFace"),
@@ -30,8 +30,6 @@
     growthFill: el("growthFill"),
     actionGrid: el("actionGrid"),
     actionHint: el("actionHint"),
-    sleepActionTitle: el("sleepActionTitle"),
-    sleepActionHint: el("sleepActionHint"),
     particleLayer: el("particleLayer"),
     toast: el("toast"),
     soundButton: el("soundButton"),
@@ -59,47 +57,51 @@
   };
 
   const stageInfo = {
-    egg: { label: "신비한 알", aria: "무늬가 있는 신비한 알" },
-    baby: { label: "말랑 아기", aria: "막 태어난 말랑한 아기 생명체" },
-    child: { label: "호기심 꼬마", aria: "호기심 많은 어린 생명체" },
-    adult: { label: "성체", aria: "건강하게 성장한 신비한 생명체" }
+    seed: { label: "작은 씨앗", aria: "화분 흙에 심긴 작은 갈색 씨앗" },
+    sprout: { label: "초록 새싹", aria: "화분 위로 두 잎을 틔운 초록 새싹" },
+    tree: { label: "어린 나무", aria: "둥근 잎이 풍성하게 자란 어린 나무" },
+    flower: { label: "활짝 핀 꽃", aria: "나무 위에 분홍 꽃을 활짝 피운 반려 식물" },
+    fruit: { label: "열매 나무", aria: "세 개의 열매를 맺은 건강한 반려 식물" }
   };
 
   const formInfo = {
-    balanced: { label: "별빛 수호형", aria: "분홍빛 날개를 가진 균형형 성체" },
-    active: { label: "햇살 날개형", aria: "노란빛 긴 귀를 가진 활동형 성체" },
-    cozy: { label: "포근 구름형", aria: "보랏빛 둥근 몸을 가진 포근형 성체" }
+    balanced: { label: "별빛 열매", aria: "분홍빛 별빛 열매를 맺은 균형 잡힌 나무" },
+    sunny: { label: "햇살 열매", aria: "노란 햇살 열매를 맺은 밝은 나무" },
+    dewy: { label: "이슬 열매", aria: "푸른 이슬 열매를 맺은 촉촉한 나무" }
   };
 
   function clamp(value, min = 0, max = 100) {
     return Math.min(max, Math.max(min, Number.isFinite(value) ? value : min));
   }
 
+  function randomBetween(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
   function createInitialState() {
     return {
       version: SAVE_VERSION,
-      pet: {
+      plant: {
         name: "",
-        birthAt: null,
-        stage: "egg",
+        plantedAt: null,
+        stage: "seed",
         form: null,
         xp: 0,
-        isSleeping: false,
         isSick: false
       },
       stats: {
-        fullness: 82,
-        happiness: 82,
-        cleanliness: 82,
-        energy: 82,
+        water: 82,
+        sunlight: 82,
+        nutrients: 82,
+        vitality: 82,
         health: 100
       },
       counters: {
-        feed: 0,
-        play: 0,
-        clean: 0,
-        sleep: 0,
-        medicine: 0
+        water: 0,
+        sun: 0,
+        soil: 0,
+        music: 0,
+        tonic: 0
       },
       settings: {
         muted: false
@@ -110,68 +112,56 @@
 
   function normalizeState(raw) {
     if (!raw || typeof raw !== "object" || raw.version !== SAVE_VERSION) {
-      throw new Error("지원하지 않는 저장 데이터");
+      throw new Error("지원하지 않는 정원 저장 데이터");
     }
 
     const fresh = createInitialState();
+    const now = Date.now();
     const allowedStages = Object.keys(stageInfo);
     const allowedForms = Object.keys(formInfo);
-    const name = typeof raw.pet?.name === "string" ? raw.pet.name.trim().slice(0, 10) : "";
-    const now = Date.now();
-    const rawBirthAt = Number(raw.pet?.birthAt);
-    const birthAt = Number.isFinite(rawBirthAt) && rawBirthAt > 0
-      ? Math.min(rawBirthAt, now)
-      : null;
-    const stage = allowedStages.includes(raw.pet?.stage) ? raw.pet.stage : "egg";
-    const form = allowedForms.includes(raw.pet?.form) ? raw.pet.form : null;
+    const name = typeof raw.plant?.name === "string" ? raw.plant.name.trim().slice(0, 10) : "";
+    const rawPlantedAt = Number(raw.plant?.plantedAt);
+    const plantedAt = Number.isFinite(rawPlantedAt) && rawPlantedAt > 0 ? Math.min(rawPlantedAt, now) : null;
+    const stage = allowedStages.includes(raw.plant?.stage) ? raw.plant.stage : "seed";
+    const form = allowedForms.includes(raw.plant?.form) ? raw.plant.form : null;
 
     const normalized = {
       ...fresh,
-      pet: {
-        ...fresh.pet,
+      plant: {
+        ...fresh.plant,
         name,
-        birthAt,
+        plantedAt,
         stage,
-        form: stage === "adult" ? (form || "balanced") : null,
-        xp: clamp(Number(raw.pet?.xp), 0, 9999),
-        isSleeping: Boolean(raw.pet?.isSleeping),
-        isSick: Boolean(raw.pet?.isSick)
+        form: stage === "fruit" ? (form || "balanced") : null,
+        xp: clamp(Number(raw.plant?.xp), 0, 9999),
+        isSick: Boolean(raw.plant?.isSick)
       },
       stats: { ...fresh.stats },
       counters: { ...fresh.counters },
-      settings: {
-        muted: Boolean(raw.settings?.muted)
-      },
-      lastSeen: Number.isFinite(raw.lastSeen) ? raw.lastSeen : Date.now()
+      settings: { muted: Boolean(raw.settings?.muted) },
+      lastSeen: Number.isFinite(raw.lastSeen) ? raw.lastSeen : now
     };
 
     STAT_KEYS.forEach((key) => {
       const value = Number(raw.stats?.[key]);
-      normalized.stats[key] = Number.isFinite(value) ? clamp(value, 0, 100) : fresh.stats[key];
+      normalized.stats[key] = Number.isFinite(value) ? clamp(value) : fresh.stats[key];
     });
-
     Object.keys(normalized.counters).forEach((key) => {
       const value = Number(raw.counters?.[key]);
       normalized.counters[key] = Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0;
     });
 
-    if (!normalized.pet.name || !normalized.pet.birthAt) {
-      return fresh;
-    }
-
+    if (!name || !plantedAt) return fresh;
     return normalized;
   }
 
   function loadGame() {
     const raw = localStorage.getItem(SAVE_KEY);
-    if (!raw) {
-      return { data: createInitialState(), hadSave: false, wasInvalid: false };
-    }
-
+    if (!raw) return { data: createInitialState(), hadSave: false, wasInvalid: false };
     try {
       return { data: normalizeState(JSON.parse(raw)), hadSave: true, wasInvalid: false };
     } catch (error) {
-      console.warn("저장 데이터를 복구했습니다.", error);
+      console.warn("정원 저장 데이터를 복구했습니다.", error);
       return { data: createInitialState(), hadSave: false, wasInvalid: true };
     }
   }
@@ -188,7 +178,7 @@
   let nextEventAt = Date.now() + randomBetween(180_000, 300_000);
   let offlineReport = null;
 
-  if (loaded.hadSave && state.pet.name) {
+  if (loaded.hadSave && state.plant.name) {
     const now = Date.now();
     const safeLastSeen = state.lastSeen > now + 300_000 ? now : state.lastSeen;
     const elapsed = Math.max(0, now - safeLastSeen);
@@ -196,23 +186,17 @@
     if (elapsed > 0) applyElapsed(elapsed);
     state.lastSeen = now;
     lastTickAt = now;
-    if (elapsed >= 60_000) {
-      offlineReport = {
-        elapsed,
-        before,
-        after: { ...state.stats }
-      };
-    }
+    if (elapsed >= 60_000) offlineReport = { elapsed, before, after: { ...state.stats } };
   }
 
   function saveGame() {
-    if (!state.pet.name) return;
+    if (!state.plant.name) return;
     state.lastSeen = Date.now();
     try {
       localStorage.setItem(SAVE_KEY, JSON.stringify(state));
       lastSavedAt = Date.now();
     } catch (error) {
-      console.warn("저장하지 못했습니다.", error);
+      console.warn("정원을 저장하지 못했습니다.", error);
       showToast("저장 공간을 사용할 수 없어요. 브라우저 설정을 확인해 주세요.");
     }
   }
@@ -222,36 +206,25 @@
   }
 
   function applyElapsed(milliseconds) {
-    if (!state.pet.name || milliseconds <= 0) return;
-
+    if (!state.plant.name || milliseconds <= 0) return;
     const totalMinutes = milliseconds / 60_000;
     const steps = Math.min(720, Math.max(1, Math.ceil(totalMinutes / 5)));
     const minutesPerStep = totalMinutes / steps;
 
     for (let index = 0; index < steps; index += 1) {
-      if (state.pet.isSleeping) {
-        adjustStat("fullness", -0.18 * minutesPerStep);
-        adjustStat("happiness", -0.08 * minutesPerStep);
-        adjustStat("cleanliness", -0.1 * minutesPerStep);
-        adjustStat("energy", 1.2 * minutesPerStep);
-      } else {
-        adjustStat("fullness", -0.28 * minutesPerStep);
-        adjustStat("happiness", -0.2 * minutesPerStep);
-        adjustStat("cleanliness", -0.16 * minutesPerStep);
-        adjustStat("energy", -0.24 * minutesPerStep);
-      }
+      adjustStat("water", -0.3 * minutesPerStep);
+      adjustStat("sunlight", -0.2 * minutesPerStep);
+      adjustStat("nutrients", -0.12 * minutesPerStep);
+      adjustStat("vitality", -0.18 * minutesPerStep);
 
       const criticalCount = CORE_STAT_KEYS.filter((key) => state.stats[key] <= 20).length;
       if (criticalCount >= 2) {
         adjustStat("health", -0.38 * minutesPerStep);
-      } else if (criticalCount === 0 && !state.pet.isSick) {
+      } else if (criticalCount === 0 && !state.plant.isSick) {
         adjustStat("health", 0.08 * minutesPerStep);
       }
-
-      if (state.stats.health <= 35) state.pet.isSick = true;
-      if (state.pet.isSick && state.stats.health >= 60 && criticalCount < 2) {
-        state.pet.isSick = false;
-      }
+      if (state.stats.health <= 35) state.plant.isSick = true;
+      if (state.plant.isSick && state.stats.health >= 60 && criticalCount < 2) state.plant.isSick = false;
     }
   }
 
@@ -260,48 +233,39 @@
   }
 
   function grantXp(amount) {
-    if (state.pet.isSick || averageCoreStats() < 35) return false;
-    state.pet.xp = clamp(state.pet.xp + amount, 0, 9999);
+    if (state.plant.isSick || averageCoreStats() < 35) return false;
+    state.plant.xp = clamp(state.plant.xp + amount, 0, 9999);
     return true;
   }
 
-  function chooseAdultForm() {
-    const { feed, play, clean, sleep } = state.counters;
-    const careTotal = Math.max(1, feed + play + clean);
-    if (play / careTotal >= 0.4 && play >= feed && play >= clean) return "active";
-    if (feed + sleep > play + clean + 2) return "cozy";
+  function chooseFruitForm() {
+    const { water, sun, soil, music } = state.counters;
+    const careTotal = Math.max(1, water + sun + soil + music);
+    if (sun / careTotal >= 0.4 && sun >= water && sun >= soil) return "sunny";
+    if (water + soil > sun + music + 2) return "dewy";
     return "balanced";
   }
 
   function checkGrowth() {
-    if (!state.pet.name || state.pet.isSick || averageCoreStats() < 35) return null;
-    const oldStage = state.pet.stage;
-
-    if (state.pet.stage === "egg" && Date.now() - state.pet.birthAt >= HATCH_TIME_MS) {
-      state.pet.stage = "baby";
+    if (!state.plant.name || state.plant.isSick || averageCoreStats() < 35) return null;
+    const oldStage = state.plant.stage;
+    if (state.plant.stage === "seed" && Date.now() - state.plant.plantedAt >= SPROUT_TIME_MS) state.plant.stage = "sprout";
+    if (state.plant.stage === "sprout" && state.plant.xp >= TREE_XP) state.plant.stage = "tree";
+    if (state.plant.stage === "tree" && state.plant.xp >= FLOWER_XP) state.plant.stage = "flower";
+    if (state.plant.stage === "flower" && state.plant.xp >= FRUIT_XP) {
+      state.plant.stage = "fruit";
+      state.plant.form = chooseFruitForm();
     }
-    if (state.pet.stage === "baby" && state.pet.xp >= CHILD_XP) {
-      state.pet.stage = "child";
-    }
-    if (state.pet.stage === "child" && state.pet.xp >= ADULT_XP) {
-      state.pet.stage = "adult";
-      state.pet.form = chooseAdultForm();
-    }
-
-    if (oldStage !== state.pet.stage) {
-      return { oldStage, newStage: state.pet.stage, form: state.pet.form };
-    }
-    return null;
+    return oldStage === state.plant.stage ? null : { oldStage, newStage: state.plant.stage, form: state.plant.form };
   }
 
   function stageDisplay() {
-    if (state.pet.stage === "adult") return formInfo[state.pet.form || "balanced"];
-    return stageInfo[state.pet.stage];
+    return state.plant.stage === "fruit" ? formInfo[state.plant.form || "balanced"] : stageInfo[state.plant.stage];
   }
 
   function formatDuration(milliseconds) {
     const minutes = Math.max(0, Math.floor(milliseconds / 60_000));
-    if (minutes < 1) return "방금 만남";
+    if (minutes < 1) return "방금 심음";
     if (minutes < 60) return `${minutes}분째 함께`;
     const hours = Math.floor(minutes / 60);
     if (hours < 24) return `${hours}시간 ${minutes % 60}분째`;
@@ -310,75 +274,62 @@
   }
 
   function growthState() {
-    if (state.pet.stage === "egg") {
-      const elapsed = Math.max(0, Date.now() - state.pet.birthAt);
-      return {
-        percent: clamp((elapsed / HATCH_TIME_MS) * 100),
-        copy: elapsed >= HATCH_TIME_MS ? "곧 깨어나요" : "알이 깨어날 준비 중"
-      };
+    if (state.plant.stage === "seed") {
+      const elapsed = Math.max(0, Date.now() - state.plant.plantedAt);
+      return { percent: clamp((elapsed / SPROUT_TIME_MS) * 100), copy: elapsed >= SPROUT_TIME_MS ? "곧 새싹이 올라와요" : "새싹을 틔울 준비 중" };
     }
-    if (state.pet.stage === "baby") {
-      return { percent: clamp((state.pet.xp / CHILD_XP) * 100), copy: `꼬마까지 ${Math.max(0, CHILD_XP - Math.floor(state.pet.xp))} 성장` };
-    }
-    if (state.pet.stage === "child") {
-      return {
-        percent: clamp(((state.pet.xp - CHILD_XP) / (ADULT_XP - CHILD_XP)) * 100),
-        copy: `성체까지 ${Math.max(0, ADULT_XP - Math.floor(state.pet.xp))} 성장`
-      };
-    }
-    return { percent: 100, copy: `${formInfo[state.pet.form || "balanced"].label} 완성` };
+    if (state.plant.stage === "sprout") return { percent: clamp((state.plant.xp / TREE_XP) * 100), copy: `나무까지 ${Math.max(0, TREE_XP - Math.floor(state.plant.xp))} 성장` };
+    if (state.plant.stage === "tree") return { percent: clamp(((state.plant.xp - TREE_XP) / (FLOWER_XP - TREE_XP)) * 100), copy: `꽃까지 ${Math.max(0, FLOWER_XP - Math.floor(state.plant.xp))} 성장` };
+    if (state.plant.stage === "flower") return { percent: clamp(((state.plant.xp - FLOWER_XP) / (FRUIT_XP - FLOWER_XP)) * 100), copy: `열매까지 ${Math.max(0, FRUIT_XP - Math.floor(state.plant.xp))} 성장` };
+    return { percent: 100, copy: `${formInfo[state.plant.form || "balanced"].label} 완성` };
   }
 
   function conditionState() {
-    if (state.pet.isSleeping) return { label: "꿈꾸는 중", className: "sleep", face: "–", mood: "잠들어 있음" };
-    if (state.pet.isSick) return { label: "치료가 필요해요", className: "danger", face: "﹏", mood: "아픔" };
+    if (state.plant.isSick) return { label: "시들고 있어요", className: "danger", face: "﹏", mood: "시듦" };
     const average = averageCoreStats();
-    if (average >= 72) return { label: "아주 좋아요", className: "", face: "⌣", mood: "기분 좋음" };
-    if (average >= 42) return { label: "조금 신경 써줘요", className: "warning", face: "•", mood: "보통" };
-    return { label: "돌봄이 필요해요", className: "danger", face: "⌢", mood: "기분 나쁨" };
+    if (average >= 72) return { label: "싱그럽게 반짝여요", className: "", face: "⌣", mood: "싱그러움" };
+    if (average >= 42) return { label: "조금 보살펴 주세요", className: "warning", face: "•", mood: "보통" };
+    return { label: "돌봄이 필요해요", className: "danger", face: "⌢", mood: "기운 없음" };
   }
 
   function defaultSpeech() {
-    if (!state.pet.name) return "알 속에서 작은 소리가 들려요.";
-    if (state.pet.isSleeping) return "새근새근… 포근한 꿈을 꾸는 중이야.";
-    if (state.pet.isSick) return "몸이 조금 안 좋아… 치료해 줄래?";
-    if (state.pet.stage === "egg") return "톡, 토독… 곧 만날 수 있을 것 같아!";
+    if (!state.plant.name) return "흙 속에서 작은 생명이 기다리고 있어요.";
+    if (state.plant.isSick) return "잎에 힘이 없어… 영양제를 줄래?";
+    if (state.plant.stage === "seed") return "흙이 포근해. 곧 초록 잎을 보여 줄게!";
     const lowestKey = CORE_STAT_KEYS.reduce((lowest, key) => state.stats[key] < state.stats[lowest] ? key : lowest, CORE_STAT_KEYS[0]);
     if (state.stats[lowestKey] < 28) {
       const messages = {
-        fullness: "배에서 꼬르륵 소리가 나!",
-        happiness: "같이 신나게 놀고 싶어.",
-        cleanliness: "보송보송하게 씻고 싶어.",
-        energy: "눈이 자꾸 감겨… 조금 잘까?"
+        water: "흙이 바싹 말랐어… 물이 필요해!",
+        sunlight: "따뜻한 햇살을 쬐고 싶어.",
+        nutrients: "흙에 영양이 조금 부족한 것 같아.",
+        vitality: "기분 좋은 음악을 들려줄래?"
       };
       return messages[lowestKey];
     }
-    const happyMessages = [
-      `${state.pet.name}, 오늘도 반짝반짝!`,
-      "네가 와줘서 정말 좋아.",
-      "오늘은 어떤 일이 생길까?",
-      "함께 있으니 마음이 몽글몽글해."
+    const messages = [
+      `${state.plant.name}, 오늘도 쑥쑥 자라는 중!`,
+      "네가 와주니 잎이 더 반짝이는 것 같아.",
+      "오늘은 어떤 햇살이 찾아올까?",
+      "정원 바람이 살랑살랑 기분 좋아."
     ];
-    return happyMessages[Math.floor(Date.now() / 15_000) % happyMessages.length];
+    return messages[Math.floor(Date.now() / 15_000) % messages.length];
   }
 
   function render() {
     const display = stageDisplay();
-    const age = state.pet.birthAt ? formatDuration(Date.now() - state.pet.birthAt) : "방금 만남";
-    dom.petName.textContent = state.pet.name || "새 친구";
+    const age = state.plant.plantedAt ? formatDuration(Date.now() - state.plant.plantedAt) : "방금 심음";
+    dom.plantName.textContent = state.plant.name || "새 씨앗";
     dom.stageLabel.textContent = display.label;
     dom.ageLabel.textContent = age;
     dom.settingsAge.textContent = age;
     dom.settingsStage.textContent = display.label;
 
-    dom.pet.classList.remove(...STAGE_CLASSES, ...FORM_CLASSES);
-    dom.pet.classList.add(`stage-${state.pet.stage}`);
-    if (state.pet.stage === "adult") dom.pet.classList.add(`form-${state.pet.form || "balanced"}`);
-    dom.pet.classList.toggle("is-sick", state.pet.isSick);
-    dom.pet.classList.toggle("is-sleeping", state.pet.isSleeping);
-    dom.pet.setAttribute("aria-label", state.pet.stage === "adult" ? formInfo[state.pet.form || "balanced"].aria : stageInfo[state.pet.stage].aria);
-    dom.sleepMarks.classList.toggle("visible", state.pet.isSleeping);
-    dom.sickMark.classList.toggle("visible", state.pet.isSick);
+    dom.plant.classList.remove(...STAGE_CLASSES, ...FORM_CLASSES);
+    dom.plant.classList.add(`stage-${state.plant.stage}`);
+    if (state.plant.stage === "fruit") dom.plant.classList.add(`form-${state.plant.form || "balanced"}`);
+    dom.plant.classList.toggle("is-sick", state.plant.isSick);
+    dom.plant.setAttribute("aria-label", state.plant.stage === "fruit" ? formInfo[state.plant.form || "balanced"].aria : stageInfo[state.plant.stage].aria);
+    dom.sickMark.classList.toggle("visible", state.plant.isSick);
 
     STAT_KEYS.forEach((key) => {
       const value = Math.round(state.stats[key]);
@@ -393,7 +344,7 @@
     });
 
     const growth = growthState();
-    dom.growthCopy.textContent = state.pet.isSick || averageCoreStats() < 35 ? "회복하면 다시 자라요" : growth.copy;
+    dom.growthCopy.textContent = state.plant.isSick || averageCoreStats() < 35 ? "회복하면 다시 자라요" : growth.copy;
     dom.growthFill.style.width = `${growth.percent}%`;
     dom.growthTrack.setAttribute("aria-valuenow", String(Math.round(growth.percent)));
 
@@ -402,22 +353,15 @@
     dom.conditionChip.className = `condition-chip ${condition.className}`.trim();
     dom.moodFace.textContent = condition.face;
     dom.moodOrb.setAttribute("aria-label", condition.mood);
-    dom.moodOrb.style.background = condition.className === "danger" ? "#ffe0e3" : condition.className === "sleep" ? "#e9e5ff" : condition.className === "warning" ? "#ffedd1" : "#ffe7a9";
+    dom.moodOrb.style.background = condition.className === "danger" ? "#ffe0e3" : condition.className === "warning" ? "#ffedd1" : "#e2f3d5";
 
-    dom.sleepActionTitle.textContent = state.pet.isSleeping ? "깨우기" : "재우기";
-    dom.sleepActionHint.textContent = state.pet.isSleeping ? "살며시 톡톡" : "포근한 꿈";
-
-    const buttons = dom.actionGrid.querySelectorAll("[data-action]");
-    buttons.forEach((button) => {
+    dom.actionGrid.querySelectorAll("[data-action]").forEach((button) => {
       const action = button.dataset.action;
-      let disabled = false;
-      if (!state.pet.name) disabled = true;
-      if (state.pet.isSleeping && action !== "sleep") disabled = true;
-      if (action === "play" && (state.pet.stage === "egg" || state.stats.energy < 15 || state.stats.fullness < 10)) disabled = true;
-      if (action === "medicine" && !state.pet.isSick && state.stats.health >= 70) disabled = true;
+      let disabled = !state.plant.name;
+      if (action === "sun" && (state.plant.stage === "seed" || state.stats.water < 10)) disabled = true;
+      if (action === "tonic" && !state.plant.isSick && state.stats.health >= 75 && state.stats.nutrients >= 75) disabled = true;
       button.disabled = disabled;
     });
-
     updateSoundControls();
   }
 
@@ -432,19 +376,15 @@
     window.clearTimeout(speechTimer);
     dom.speechBubble.classList.remove("hidden");
     dom.speechText.textContent = message;
-    if (duration > 0) {
-      speechTimer = window.setTimeout(() => {
-        dom.speechText.textContent = defaultSpeech();
-      }, duration);
-    }
+    if (duration > 0) speechTimer = window.setTimeout(() => { dom.speechText.textContent = defaultSpeech(); }, duration);
   }
 
-  function animatePet(action) {
+  function animatePlant(action) {
     window.clearTimeout(animationTimer);
-    dom.pet.classList.remove(...ACTION_CLASSES);
-    void dom.pet.offsetWidth;
-    dom.pet.classList.add(`action-${action}`);
-    animationTimer = window.setTimeout(() => dom.pet.classList.remove(`action-${action}`), action === "evolve" ? 1500 : 1200);
+    dom.plant.classList.remove(...ACTION_CLASSES);
+    void dom.plant.offsetWidth;
+    dom.plant.classList.add(`action-${action}`);
+    animationTimer = window.setTimeout(() => dom.plant.classList.remove(`action-${action}`), action === "evolve" ? 1500 : 1200);
   }
 
   function createParticles(symbols, color) {
@@ -489,11 +429,11 @@
 
   function playChime(kind = "happy") {
     if (kind === "sad") {
-      playTone(330, 0.18, "sine");
+      playTone(330, 0.18);
       playTone(260, 0.2, "sine", 0.12);
       return;
     }
-    playTone(520, 0.12, "sine");
+    playTone(520, 0.12);
     playTone(690, 0.13, "sine", 0.1);
     if (kind === "evolve") playTone(880, 0.28, "triangle", 0.22);
   }
@@ -518,7 +458,7 @@
     const growth = checkGrowth();
     setSpeech(speech);
     showToast(toast);
-    animatePet(animation);
+    animatePlant(animation);
     createParticles(symbols, color);
     playChime(sound);
     render();
@@ -527,82 +467,78 @@
   }
 
   function handleCare(action) {
-    if (!state.pet.name || Date.now() < cooldownUntil) {
+    if (!state.plant.name || Date.now() < cooldownUntil) {
       if (Date.now() < cooldownUntil) showToast("조금만 천천히 돌봐 주세요.");
       return;
     }
 
-    if (state.pet.isSleeping && action !== "sleep") {
-      showToast(`${state.pet.name}가 자고 있어요. 먼저 깨워 주세요.`);
-      return;
-    }
-
-    if (action === "feed") {
-      if (state.stats.fullness >= 96) {
-        setSpeech("배가 아주 든든해! 나중에 먹을래.");
-        showToast("이미 배가 불러요.");
+    if (action === "water") {
+      if (state.stats.water >= 96) {
+        setSpeech("흙이 이미 촉촉해! 잠시 후에 물을 줄래?");
+        showToast("수분이 이미 충분해요.");
         return;
       }
-      adjustStat("fullness", 24);
-      adjustStat("happiness", 3);
-      adjustStat("cleanliness", -3);
-      state.counters.feed += 1;
+      adjustStat("water", 28);
+      adjustStat("vitality", 3);
+      adjustStat("nutrients", -1);
+      state.counters.water += 1;
       grantXp(5);
-      afterCare({ speech: "냠냠! 별맛 간식은 정말 맛있어!", toast: "포만감이 올랐어요.", animation: "feed", symbols: ["♥", "●"], color: "#ee8da8" });
+      afterCare({ speech: "쪼르르… 시원한 물이 뿌리까지 내려와!", toast: "흙이 촉촉해졌어요.", animation: "water", symbols: ["●", "♧"], color: "#62b8d1" });
       return;
     }
 
-    if (action === "clean") {
-      if (state.stats.cleanliness >= 97) {
-        setSpeech("지금도 보송보송한걸? 반짝반짝해!");
-        showToast("이미 아주 깨끗해요.");
+    if (action === "soil") {
+      if (state.stats.nutrients >= 97) {
+        setSpeech("흙이 폭신하고 영양도 가득해!");
+        showToast("흙 상태가 이미 아주 좋아요.");
         return;
       }
-      adjustStat("cleanliness", 30);
-      adjustStat("happiness", state.stats.energy < 20 ? -2 : 3);
-      state.counters.clean += 1;
+      adjustStat("nutrients", 27);
+      adjustStat("water", -2);
+      adjustStat("vitality", 3);
+      state.counters.soil += 1;
       grantXp(5);
-      afterCare({ speech: "뽀득뽀득, 기분까지 상쾌해!", toast: "깨끗하게 씻었어요.", animation: "clean", symbols: ["○", "✦"], color: "#69bcae" });
+      afterCare({ speech: "폭신폭신한 흙 덕분에 뿌리가 쭉 뻗어!", toast: "흙에 영양을 채웠어요.", animation: "soil", symbols: ["◆", "♧"], color: "#9f7656" });
       return;
     }
 
-    if (action === "sleep") {
-      state.pet.isSleeping = !state.pet.isSleeping;
-      if (state.pet.isSleeping) {
-        state.counters.sleep += 1;
-        grantXp(2);
-        afterCare({ speech: "이불이 구름처럼 포근해… 잘 자!", toast: "잠들었어요. 에너지가 회복됩니다.", animation: "feed", symbols: ["☾", "✦"], color: "#9181cb" });
-      } else {
-        adjustStat("happiness", 2);
-        afterCare({ speech: "잘 잤다! 다시 함께 놀자.", toast: "상쾌하게 일어났어요.", animation: "feed", symbols: ["☀", "✦"], color: "#eebd57" });
+    if (action === "music") {
+      if (state.stats.vitality >= 97) {
+        setSpeech("지금도 신나서 잎이 살랑살랑 춤추고 있어!");
+        showToast("이미 생기가 가득해요.");
+        return;
       }
+      adjustStat("vitality", 25);
+      adjustStat("health", 4);
+      state.counters.music += 1;
+      grantXp(4);
+      afterCare({ speech: "라라라♪ 잎사귀가 절로 춤을 추는걸!", toast: "음악을 듣고 생기가 올랐어요.", animation: "music", symbols: ["♫", "♥"], color: "#6ab27a" });
       return;
     }
 
-    if (action === "medicine") {
-      if (!state.pet.isSick && state.stats.health >= 70) {
-        showToast("지금은 약이 필요하지 않아요.");
-        setSpeech("나는 아주 건강해!");
+    if (action === "tonic") {
+      if (!state.plant.isSick && state.stats.health >= 75 && state.stats.nutrients >= 75) {
+        showToast("지금은 영양제가 필요하지 않아요.");
+        setSpeech("나는 아주 싱싱해!");
         return;
       }
       adjustStat("health", 30);
-      adjustStat("happiness", -3);
-      state.counters.medicine += 1;
-      if (state.stats.health >= 60 && CORE_STAT_KEYS.filter((key) => state.stats[key] <= 20).length < 2) {
-        state.pet.isSick = false;
-      }
+      adjustStat("nutrients", 18);
+      adjustStat("water", -3);
+      state.counters.tonic += 1;
+      if (state.stats.health >= 60 && CORE_STAT_KEYS.filter((key) => state.stats[key] <= 20).length < 2) state.plant.isSick = false;
       grantXp(3);
-      afterCare({ speech: state.pet.isSick ? "조금 나아졌어. 한 번 더 돌봐줘!" : "이제 몸이 한결 가벼워졌어!", toast: "건강이 회복되었어요.", animation: "heal", symbols: ["＋", "♥"], color: "#e37a80" });
+      afterCare({ speech: state.plant.isSick ? "조금 나아졌어. 다른 상태도 돌봐줘!" : "줄기와 잎에 다시 힘이 생겼어!", toast: "영양제로 건강을 회복했어요.", animation: "heal", symbols: ["＋", "♧"], color: "#df7c82" });
       return;
     }
 
-    if (action === "play") {
-      if (state.pet.stage === "egg") {
-        showToast("알이 깨어나면 함께 놀 수 있어요.");
+    if (action === "sun") {
+      if (state.plant.stage === "seed") {
+        showToast("새싹이 올라오면 햇살을 모을 수 있어요.");
         return;
       }
-      if (state.stats.energy < 15 || state.stats.fullness < 10) {
-        showToast("놀기 전에 밥이나 잠이 필요해요.");
+      if (state.stats.water < 10) {
+        showToast("강한 햇빛을 받기 전에 물을 먼저 주세요.");
         return;
       }
       openMiniGame();
@@ -612,55 +548,52 @@
   function announceGrowth(growth) {
     const display = stageDisplay();
     window.setTimeout(() => {
-      animatePet("evolve");
-      createParticles(["✦", "♥", "★"], "#cf80ad");
+      animatePlant("evolve");
+      createParticles(["✦", "♧", "♥"], "#73b77f");
       playChime("evolve");
-      setSpeech(growth.newStage === "adult" ? `짜잔! ${display.label}으로 자랐어!` : "몸이 반짝이더니 한 뼘 더 자랐어!", 5200);
-      showToast(`${state.pet.name}가 ${display.label}(으)로 성장했어요!`);
+      const message = growth.newStage === "fruit" ? `짜잔! ${display.label}를 맺었어!` : `${display.label}(으)로 쑥 자랐어!`;
+      setSpeech(message, 5200);
+      showToast(`${state.plant.name}가 ${display.label}(으)로 성장했어요!`);
       render();
       saveGame();
     }, 180);
   }
 
-  function randomBetween(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
-
   function triggerRandomEvent() {
-    if (!state.pet.name || dom.minigameDialog.open || dom.settingsDialog.open || document.hidden) return;
-    const event = ["gift", "mess", "sleepy"][Math.floor(Math.random() * 3)];
-
-    if (event === "gift") {
-      adjustStat("happiness", 12);
-      adjustStat("health", 5);
-      setSpeech("창가에서 반짝이는 별조각을 찾았어!");
-      showToast("깜짝 선물! 행복과 건강이 올랐어요.");
-      createParticles(["✦", "★"], "#e6b64e");
+    if (!state.plant.name || dom.minigameDialog.open || dom.settingsDialog.open || document.hidden) return;
+    const event = ["rain", "pest", "butterfly"][Math.floor(Math.random() * 3)];
+    if (event === "rain") {
+      adjustStat("water", 18);
+      adjustStat("vitality", 5);
+      setSpeech("창밖에서 보슬비가 내려 흙이 촉촉해졌어!");
+      showToast("반가운 보슬비! 수분이 올랐어요.");
+      createParticles(["●", "○"], "#64b5d0");
       playChime();
-    } else if (event === "mess") {
-      adjustStat("cleanliness", -14);
-      setSpeech("앗, 신나게 뛰다가 방을 조금 어질렀어…");
-      showToast("장난감이 와르르! 청결이 내려갔어요.");
-      createParticles(["·", "●"], "#aa8a76");
+    } else if (event === "pest") {
+      adjustStat("health", -14);
+      adjustStat("vitality", -8);
+      if (state.stats.health <= 35) state.plant.isSick = true;
+      setSpeech("앗, 작은 벌레가 잎을 살짝 갉아먹었어…");
+      showToast("해충이 다녀갔어요. 건강을 살펴봐 주세요.");
+      createParticles(["·", "×"], "#9b7960");
       playChime("sad");
     } else {
-      adjustStat("energy", -12);
-      adjustStat("happiness", 5);
-      setSpeech("하암… 구름을 세다가 조금 졸려졌어.");
-      showToast("포근한 오후예요. 에너지가 조금 줄었어요.");
-      createParticles(["☁", "z"], "#8d80bb");
-      playTone(370, 0.2, "sine");
+      adjustStat("vitality", 12);
+      adjustStat("sunlight", 5);
+      setSpeech("예쁜 나비가 찾아와 잎 위에서 쉬어 갔어!");
+      showToast("나비의 방문! 햇빛과 생기가 올랐어요.");
+      createParticles(["✦", "♥"], "#e6ad60");
+      playTone(680, 0.18, "sine");
     }
-
     render();
     saveGame();
     nextEventAt = Date.now() + randomBetween(180_000, 300_000);
   }
 
   function showOfflineReport(report) {
-    dom.offlineSummary.textContent = `${formatDuration(report.elapsed).replace("째 함께", "").replace("째", "")} 동안의 변화를 반영했어요.`;
+    dom.offlineSummary.textContent = `${formatDuration(report.elapsed).replace("째 함께", "").replace("째", "")} 동안 정원의 변화를 반영했어요.`;
     dom.offlineChanges.replaceChildren();
-    const labels = { fullness: "포만감", happiness: "행복", cleanliness: "청결", energy: "에너지", health: "건강" };
+    const labels = { water: "수분", sunlight: "햇빛", nutrients: "영양", vitality: "생기", health: "건강" };
     STAT_KEYS.forEach((key) => {
       const before = Math.round(report.before[key]);
       const after = Math.round(report.after[key]);
@@ -678,7 +611,7 @@
       const item = document.createElement("div");
       item.className = "offline-change";
       item.style.gridColumn = "1 / -1";
-      item.textContent = "큰 변화 없이 편안히 지냈어요.";
+      item.textContent = "큰 변화 없이 편안히 햇살을 받았어요.";
       dom.offlineChanges.appendChild(item);
     }
     dom.offlineDialog.showModal();
@@ -695,7 +628,7 @@
     playerX: 0,
     width: 0,
     height: 0,
-    treats: [],
+    drops: [],
     keys: { left: false, right: false },
     frameId: 0
   };
@@ -707,8 +640,7 @@
     mini.height = Math.max(1, rect.height);
     dom.gameCanvas.width = Math.round(mini.width * ratio);
     dom.gameCanvas.height = Math.round(mini.height * ratio);
-    const context = dom.gameCanvas.getContext("2d");
-    context.setTransform(ratio, 0, 0, ratio, 0, 0);
+    dom.gameCanvas.getContext("2d").setTransform(ratio, 0, 0, ratio, 0, 0);
     if (!mini.playerX) mini.playerX = mini.width / 2;
     mini.playerX = clamp(mini.playerX, 45, mini.width - 45);
   }
@@ -720,7 +652,7 @@
     mini.running = false;
     mini.counting = true;
     mini.score = 0;
-    mini.treats = [];
+    mini.drops = [];
     mini.playerX = 0;
     mini.keys.left = false;
     mini.keys.right = false;
@@ -731,7 +663,7 @@
     dom.minigameDialog.showModal();
     resizeGameCanvas();
     drawGame();
-    playTone(440, 0.1, "sine");
+    playTone(440, 0.1);
 
     let count = 3;
     const countdownTimer = window.setInterval(() => {
@@ -742,7 +674,7 @@
       count -= 1;
       if (count > 0) {
         dom.gameCountdown.textContent = String(count);
-        playTone(440 + (3 - count) * 70, 0.1, "sine");
+        playTone(440 + (3 - count) * 70, 0.1);
       } else {
         window.clearInterval(countdownTimer);
         dom.gameCountdown.textContent = "시작!";
@@ -761,12 +693,12 @@
     }, 700);
   }
 
-  function spawnTreat() {
+  function spawnSunDrop() {
     const special = Math.random() < 0.18;
-    mini.treats.push({
+    mini.drops.push({
       x: randomBetween(24, Math.max(25, mini.width - 24)),
       y: -24,
-      radius: special ? 15 : 12,
+      radius: special ? 16 : 12,
       speed: randomBetween(105, 185),
       rotation: Math.random() * Math.PI,
       special
@@ -784,29 +716,23 @@
     if (mini.keys.left) mini.playerX -= 250 * delta;
     if (mini.keys.right) mini.playerX += 250 * delta;
     mini.playerX = clamp(mini.playerX, 45, mini.width - 45);
-
     if (now - mini.lastSpawn > Math.max(360, 690 - elapsed * 5)) {
-      spawnTreat();
+      spawnSunDrop();
       mini.lastSpawn = now;
     }
 
     const catcherY = mini.height - 45;
-    mini.treats.forEach((treat) => {
-      treat.y += treat.speed * delta;
-      treat.rotation += delta * 2.6;
-      if (
-        treat.y + treat.radius >= catcherY - 14 &&
-        treat.y - treat.radius <= catcherY + 16 &&
-        Math.abs(treat.x - mini.playerX) <= 48
-      ) {
-        treat.caught = true;
-        mini.score += treat.special ? 3 : 1;
+    mini.drops.forEach((drop) => {
+      drop.y += drop.speed * delta;
+      drop.rotation += delta * 2.6;
+      if (drop.y + drop.radius >= catcherY - 14 && drop.y - drop.radius <= catcherY + 16 && Math.abs(drop.x - mini.playerX) <= 48) {
+        drop.caught = true;
+        mini.score += drop.special ? 3 : 1;
         dom.gameScore.textContent = String(mini.score);
-        playTone(treat.special ? 820 : 620, 0.07, "sine");
+        playTone(drop.special ? 820 : 620, 0.07);
       }
     });
-    mini.treats = mini.treats.filter((treat) => !treat.caught && treat.y < mini.height + 35);
-
+    mini.drops = mini.drops.filter((drop) => !drop.caught && drop.y < mini.height + 35);
     drawGame();
     if (remaining <= 0) {
       finishMiniGame(false);
@@ -833,16 +759,15 @@
     const context = dom.gameCanvas.getContext("2d");
     const { width, height } = mini;
     context.clearRect(0, 0, width, height);
-
     const sky = context.createLinearGradient(0, 0, 0, height);
-    sky.addColorStop(0, "#a9d9ec");
-    sky.addColorStop(0.72, "#dff1ec");
-    sky.addColorStop(0.72, "#a9d5ac");
-    sky.addColorStop(1, "#8bc398");
+    sky.addColorStop(0, "#9fd4e8");
+    sky.addColorStop(0.72, "#e7f2d2");
+    sky.addColorStop(0.72, "#9dcc91");
+    sky.addColorStop(1, "#74b27d");
     context.fillStyle = sky;
     context.fillRect(0, 0, width, height);
 
-    context.fillStyle = "rgba(255,255,255,.72)";
+    context.fillStyle = "rgba(255,255,255,.7)";
     for (let index = 0; index < 4; index += 1) {
       const x = ((index * 190 + 35) % (width + 100)) - 30;
       const y = 48 + (index % 2) * 78;
@@ -852,27 +777,13 @@
       context.fill();
     }
 
-    mini.treats.forEach((treat) => {
+    mini.drops.forEach((drop) => {
       context.save();
-      context.shadowColor = "rgba(80, 58, 79, .16)";
-      context.shadowBlur = 8;
-      if (treat.special) {
-        context.fillStyle = "#f6bf4d";
-        drawStar(context, treat.x, treat.y, 5, treat.radius, treat.radius * 0.48, treat.rotation);
-        context.fill();
-      } else {
-        context.translate(treat.x, treat.y);
-        context.rotate(treat.rotation);
-        context.fillStyle = "#ed8da7";
-        context.beginPath();
-        context.roundRect(-treat.radius, -treat.radius * 0.72, treat.radius * 2, treat.radius * 1.44, 6);
-        context.fill();
-        context.fillStyle = "#fff0d0";
-        context.beginPath();
-        context.arc(-4, -2, 2, 0, Math.PI * 2);
-        context.arc(4, 3, 2, 0, Math.PI * 2);
-        context.fill();
-      }
+      context.shadowColor = "rgba(126, 91, 35, .18)";
+      context.shadowBlur = 9;
+      context.fillStyle = drop.special ? "#fff0a0" : "#f5c94f";
+      drawStar(context, drop.x, drop.y, drop.special ? 8 : 6, drop.radius, drop.radius * 0.5, drop.rotation);
+      context.fill();
       context.restore();
     });
 
@@ -880,25 +791,26 @@
     const y = height - 45;
     context.save();
     context.translate(x, y);
-    context.shadowColor = "rgba(64, 59, 71, .2)";
+    context.shadowColor = "rgba(59, 65, 48, .2)";
     context.shadowBlur = 10;
-    context.fillStyle = "#fff8eb";
+    context.fillStyle = "#d88561";
     context.beginPath();
     context.roundRect(-45, -16, 90, 35, [8, 8, 22, 22]);
     context.fill();
     context.shadowBlur = 0;
     context.lineWidth = 5;
-    context.strokeStyle = "#dc85a0";
+    context.strokeStyle = "#fff0dc";
     context.stroke();
-    context.fillStyle = "#dc85a0";
+    context.strokeStyle = "#4b9662";
+    context.lineWidth = 7;
     context.beginPath();
-    context.arc(-25, -20, 13, Math.PI, 0);
-    context.arc(25, -20, 13, Math.PI, 0);
-    context.fill();
-    context.fillStyle = "#6e5368";
+    context.moveTo(0, -15);
+    context.lineTo(0, -36);
+    context.stroke();
+    context.fillStyle = "#72bd82";
     context.beginPath();
-    context.arc(-14, -2, 2.5, 0, Math.PI * 2);
-    context.arc(14, -2, 2.5, 0, Math.PI * 2);
+    context.ellipse(-16, -36, 19, 10, 0.42, 0, Math.PI * 2);
+    context.ellipse(16, -36, 19, 10, -0.42, 0, Math.PI * 2);
     context.fill();
     context.restore();
   }
@@ -912,17 +824,16 @@
     const score = mini.score;
     if (dom.minigameDialog.open) dom.minigameDialog.close();
 
-    adjustStat("happiness", Math.min(25, 5 + score * 1.4));
-    adjustStat("fullness", Math.min(12, Math.floor(score / 2)));
-    adjustStat("energy", -10);
-    state.counters.play += 1;
-    grantXp(Math.min(15, 4 + Math.floor(score / 3)));
+    adjustStat("sunlight", Math.min(28, 6 + score * 1.5));
+    adjustStat("vitality", Math.min(18, 5 + Math.floor(score / 2)));
+    adjustStat("water", -8);
+    state.counters.sun += 1;
+    grantXp(Math.min(16, 4 + Math.floor(score / 3)));
     const growth = checkGrowth();
-    const suffix = quitEarly ? "짧게 놀았지만 즐거웠어!" : `${score}개의 간식을 받았어!`;
-    setSpeech(suffix);
-    showToast(`미니게임 종료 · 점수 ${score}`);
-    animatePet("play");
-    createParticles(["★", "♥"], "#e590aa");
+    setSpeech(quitEarly ? "짧게라도 햇살을 받아서 기분 좋아!" : `${score}개의 햇살방울을 모았어!`);
+    showToast(`햇살 모으기 종료 · 점수 ${score}`);
+    animatePlant("sun");
+    createParticles(["☀", "✦"], "#edbd4a");
     playChime(score >= 10 ? "evolve" : "happy");
     cooldownUntil = Date.now() + 1500;
     render();
@@ -940,12 +851,12 @@
   function advanceToNow() {
     const now = Date.now();
     const elapsed = Math.max(0, now - lastTickAt);
-    if (state.pet.name && elapsed > 0) applyElapsed(elapsed);
+    if (state.plant.name && elapsed > 0) applyElapsed(elapsed);
     lastTickAt = now;
   }
 
   function tick() {
-    if (!state.pet.name) return;
+    if (!state.plant.name) return;
     advanceToNow();
     const growth = checkGrowth();
     render();
@@ -969,16 +880,16 @@
       return;
     }
     state = createInitialState();
-    state.pet.name = name.slice(0, 10);
-    state.pet.birthAt = Date.now();
+    state.plant.name = name.slice(0, 10);
+    state.plant.plantedAt = Date.now();
     state.lastSeen = Date.now();
     lastTickAt = Date.now();
     dom.nameError.textContent = "";
     dom.welcomeDialog.close();
     render();
-    setSpeech(`${state.pet.name}, 멋진 이름이야! 곧 알에서 만날게.`);
-    showToast(`${state.pet.name}와의 첫날이 시작됐어요.`);
-    createParticles(["✦", "♥"], "#e68aa5");
+    setSpeech(`${state.plant.name}, 멋진 이름이야! 곧 초록 잎을 보여 줄게.`);
+    showToast(`${state.plant.name}와의 첫 정원이 시작됐어요.`);
+    createParticles(["✦", "♧"], "#71b97d");
     playChime("evolve");
     saveGame();
   });
@@ -986,68 +897,42 @@
   dom.welcomeDialog.addEventListener("cancel", (event) => event.preventDefault());
   dom.soundButton.addEventListener("click", toggleSound);
   dom.soundToggle.addEventListener("click", toggleSound);
-  dom.settingsButton.addEventListener("click", () => {
-    render();
-    dom.settingsDialog.showModal();
-  });
+  dom.settingsButton.addEventListener("click", () => { render(); dom.settingsDialog.showModal(); });
   document.querySelector("[data-close='settings']").addEventListener("click", () => dom.settingsDialog.close());
   dom.offlineClose.addEventListener("click", () => dom.offlineDialog.close());
   dom.resetButton.addEventListener("click", () => {
-    const confirmed = window.confirm(`${state.pet.name || "현재 친구"}와의 기록을 지우고 새 알로 시작할까요? 이 작업은 되돌릴 수 없어요.`);
+    const confirmed = window.confirm(`${state.plant.name || "현재 식물"}의 기록을 지우고 새 씨앗으로 시작할까요? 이 작업은 되돌릴 수 없어요.`);
     if (!confirmed) return;
     localStorage.removeItem(SAVE_KEY);
     window.location.reload();
   });
 
   dom.quitGameButton.addEventListener("click", () => finishMiniGame(true));
-  dom.minigameDialog.addEventListener("cancel", (event) => {
-    event.preventDefault();
-    finishMiniGame(true);
-  });
+  dom.minigameDialog.addEventListener("cancel", (event) => { event.preventDefault(); finishMiniGame(true); });
   dom.gameCanvas.addEventListener("pointerdown", moveCatcherFromPointer);
   dom.gameCanvas.addEventListener("pointermove", (event) => {
     if (event.buttons || event.pointerType === "touch") moveCatcherFromPointer(event);
   });
-
   window.addEventListener("keydown", (event) => {
     if (!dom.minigameDialog.open) return;
-    if (event.key === "ArrowLeft" || event.key.toLowerCase() === "a") {
-      mini.keys.left = true;
-      event.preventDefault();
-    }
-    if (event.key === "ArrowRight" || event.key.toLowerCase() === "d") {
-      mini.keys.right = true;
-      event.preventDefault();
-    }
+    if (event.key === "ArrowLeft" || event.key.toLowerCase() === "a") { mini.keys.left = true; event.preventDefault(); }
+    if (event.key === "ArrowRight" || event.key.toLowerCase() === "d") { mini.keys.right = true; event.preventDefault(); }
   });
   window.addEventListener("keyup", (event) => {
     if (event.key === "ArrowLeft" || event.key.toLowerCase() === "a") mini.keys.left = false;
     if (event.key === "ArrowRight" || event.key.toLowerCase() === "d") mini.keys.right = false;
   });
   window.addEventListener("resize", () => {
-    if (dom.minigameDialog.open) {
-      resizeGameCanvas();
-      drawGame();
-    }
+    if (dom.minigameDialog.open) { resizeGameCanvas(); drawGame(); }
   });
-
   document.addEventListener("visibilitychange", () => {
-    if (document.hidden) {
-      advanceToNow();
-      saveGame();
-    } else {
-      advanceToNow();
-      render();
-    }
+    if (document.hidden) { advanceToNow(); saveGame(); } else { advanceToNow(); render(); }
   });
-  window.addEventListener("beforeunload", () => {
-    advanceToNow();
-    saveGame();
-  });
+  window.addEventListener("beforeunload", () => { advanceToNow(); saveGame(); });
 
   render();
   setSpeech(defaultSpeech(), 0);
-  if (!state.pet.name) {
+  if (!state.plant.name) {
     dom.welcomeDialog.showModal();
     window.setTimeout(() => dom.nameInput.focus(), 100);
   } else {
@@ -1056,6 +941,6 @@
     saveGame();
     if (offlineReport) window.setTimeout(() => showOfflineReport(offlineReport), 250);
   }
-  if (loaded.wasInvalid) window.setTimeout(() => showToast("저장 데이터를 안전하게 복구했어요. 새 친구를 만나 주세요."), 350);
+  if (loaded.wasInvalid) window.setTimeout(() => showToast("정원 저장 데이터를 안전하게 복구했어요. 새 씨앗을 심어 주세요."), 350);
   window.setInterval(tick, 1000);
 })();
