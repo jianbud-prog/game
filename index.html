@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f6b6c8">
-  <meta name="description" content="신비한 알에서 태어난 작은 친구를 돌보고 성장시키는 오프라인 다마고치 게임">
-  <title>몽글몽글 알숲</title>
+  <meta name="theme-color" content="#8ccca5">
+  <meta name="description" content="작은 씨앗을 돌보며 새싹, 나무, 꽃과 열매로 성장시키는 오프라인 식물 다마고치 게임">
+  <title>포근포근 작은 정원</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -14,11 +14,11 @@
 
   <main class="app-shell">
     <header class="topbar">
-      <a class="brand" href="#game" aria-label="몽글몽글 알숲 홈">
-        <span class="brand-mark" aria-hidden="true">✦</span>
+      <a class="brand" href="#game" aria-label="포근포근 작은 정원 홈">
+        <span class="brand-mark" aria-hidden="true">♧</span>
         <span>
-          <strong>몽글몽글 알숲</strong>
-          <small>나만의 작은 친구</small>
+          <strong>포근포근 작은 정원</strong>
+          <small>나만의 반려 식물</small>
         </span>
       </a>
       <div class="header-actions">
@@ -31,12 +31,12 @@
       </div>
     </header>
 
-    <section class="dashboard" id="game" aria-label="반려 생명체 돌보기">
-      <section class="scene-card" aria-label="반려 생명체의 방">
+    <section class="dashboard" id="game" aria-label="반려 식물 돌보기">
+      <section class="scene-card" aria-label="반려 식물의 온실">
         <div class="scene-topline">
           <div>
-            <p class="eyebrow" id="stageLabel">신비한 알</p>
-            <h1 id="petName">새 친구</h1>
+            <p class="eyebrow" id="stageLabel">작은 씨앗</p>
+            <h1 id="petName">새 씨앗</h1>
           </div>
           <div class="day-badge" aria-label="함께한 시간">
             <span aria-hidden="true">☀</span>
@@ -70,30 +70,36 @@
           </div>
 
           <div class="pet-zone" id="petZone">
-            <div class="zzz" id="sleepMarks" aria-hidden="true"><span>Z</span><span>z</span><span>z</span></div>
             <div class="sick-mark" id="sickMark" aria-hidden="true">＋</div>
-            <div class="pet stage-egg" id="pet" role="img" aria-label="신비한 알">
-              <span class="pet-antenna" aria-hidden="true"><i></i></span>
-              <span class="pet-ear pet-ear-left" aria-hidden="true"></span>
-              <span class="pet-ear pet-ear-right" aria-hidden="true"></span>
-              <span class="pet-wing pet-wing-left" aria-hidden="true"></span>
-              <span class="pet-wing pet-wing-right" aria-hidden="true"></span>
-              <span class="pet-body" aria-hidden="true">
-                <span class="egg-spot spot-one"></span>
-                <span class="egg-spot spot-two"></span>
-                <span class="egg-spot spot-three"></span>
-                <span class="face">
-                  <i class="eye eye-left"></i>
-                  <i class="eye eye-right"></i>
-                  <i class="cheek cheek-left"></i>
-                  <i class="cheek cheek-right"></i>
-                  <i class="mouth"></i>
+            <div class="plant stage-seed" id="pet" role="img" aria-label="흙 속에 심긴 작은 씨앗">
+              <span class="plant-glow" aria-hidden="true"></span>
+              <span class="plant-stem" aria-hidden="true"></span>
+              <span class="plant-leaf leaf-left" aria-hidden="true"></span>
+              <span class="plant-leaf leaf-right" aria-hidden="true"></span>
+              <span class="plant-canopy" aria-hidden="true">
+                <i class="canopy-puff puff-one"></i>
+                <i class="canopy-puff puff-two"></i>
+                <i class="canopy-puff puff-three"></i>
+              </span>
+              <span class="plant-flower" aria-hidden="true">
+                <i></i><i></i><i></i><i></i><i></i><b></b>
+              </span>
+              <span class="plant-fruit fruit-one" aria-hidden="true"></span>
+              <span class="plant-fruit fruit-two" aria-hidden="true"></span>
+              <span class="plant-fruit fruit-three" aria-hidden="true"></span>
+              <span class="seed-shell" aria-hidden="true"><i></i></span>
+              <span class="plant-pot" aria-hidden="true">
+                <span class="pot-rim"></span>
+                <span class="plant-face">
+                  <i class="plant-eye eye-left"></i>
+                  <i class="plant-eye eye-right"></i>
+                  <i class="plant-cheek cheek-left"></i>
+                  <i class="plant-cheek cheek-right"></i>
+                  <i class="plant-mouth"></i>
                 </span>
                 <span class="sick-patch patch-one"></span>
                 <span class="sick-patch patch-two"></span>
               </span>
-              <span class="pet-foot pet-foot-left" aria-hidden="true"></span>
-              <span class="pet-foot pet-foot-right" aria-hidden="true"></span>
             </div>
             <div class="pet-shadow" aria-hidden="true"></div>
             <div class="particle-layer" id="particleLayer" aria-hidden="true"></div>
@@ -102,7 +108,7 @@
           <div class="floor-details" aria-hidden="true">
             <div class="rug"></div>
             <div class="toy-ball"><i></i></div>
-            <div class="food-bowl">✦</div>
+            <div class="food-bowl">♧</div>
           </div>
         </div>
       </section>
@@ -111,28 +117,28 @@
         <section class="status-card">
           <div class="section-title-row">
             <div>
-              <p class="eyebrow">오늘의 컨디션</p>
-              <h2>마음 살피기</h2>
+              <p class="eyebrow">오늘의 정원</p>
+              <h2>상태 살피기</h2>
             </div>
             <div class="mood-orb" id="moodOrb" aria-label="기분 좋음"><span id="moodFace">⌣</span></div>
           </div>
 
           <div class="stats" id="stats">
-            <div class="stat" data-stat="fullness">
-              <div class="stat-heading"><span><i class="stat-icon fullness-icon">●</i>포만감</span><strong id="fullnessValue">82</strong></div>
-              <div class="meter" id="fullnessMeter" role="progressbar" aria-label="포만감" aria-valuemin="0" aria-valuemax="100" aria-valuenow="82"><i></i></div>
+            <div class="stat" data-stat="water">
+              <div class="stat-heading"><span><i class="stat-icon water-icon">●</i>수분</span><strong id="waterValue">82</strong></div>
+              <div class="meter" id="waterMeter" role="progressbar" aria-label="수분" aria-valuemin="0" aria-valuemax="100" aria-valuenow="82"><i></i></div>
             </div>
-            <div class="stat" data-stat="happiness">
-              <div class="stat-heading"><span><i class="stat-icon happiness-icon">♥</i>행복</span><strong id="happinessValue">82</strong></div>
-              <div class="meter" id="happinessMeter" role="progressbar" aria-label="행복" aria-valuemin="0" aria-valuemax="100" aria-valuenow="82"><i></i></div>
+            <div class="stat" data-stat="sunlight">
+              <div class="stat-heading"><span><i class="stat-icon sunlight-icon">☀</i>햇빛</span><strong id="sunlightValue">82</strong></div>
+              <div class="meter" id="sunlightMeter" role="progressbar" aria-label="햇빛" aria-valuemin="0" aria-valuemax="100" aria-valuenow="82"><i></i></div>
             </div>
-            <div class="stat" data-stat="cleanliness">
-              <div class="stat-heading"><span><i class="stat-icon cleanliness-icon">✦</i>청결</span><strong id="cleanlinessValue">82</strong></div>
-              <div class="meter" id="cleanlinessMeter" role="progressbar" aria-label="청결" aria-valuemin="0" aria-valuemax="100" aria-valuenow="82"><i></i></div>
+            <div class="stat" data-stat="nutrients">
+              <div class="stat-heading"><span><i class="stat-icon nutrients-icon">◆</i>영양</span><strong id="nutrientsValue">82</strong></div>
+              <div class="meter" id="nutrientsMeter" role="progressbar" aria-label="영양" aria-valuemin="0" aria-valuemax="100" aria-valuenow="82"><i></i></div>
             </div>
-            <div class="stat" data-stat="energy">
-              <div class="stat-heading"><span><i class="stat-icon energy-icon">☾</i>에너지</span><strong id="energyValue">82</strong></div>
-              <div class="meter" id="energyMeter" role="progressbar" aria-label="에너지" aria-valuemin="0" aria-valuemax="100" aria-valuenow="82"><i></i></div>
+            <div class="stat" data-stat="vitality">
+              <div class="stat-heading"><span><i class="stat-icon vitality-icon">♥</i>생기</span><strong id="vitalityValue">82</strong></div>
+              <div class="meter" id="vitalityMeter" role="progressbar" aria-label="생기" aria-valuemin="0" aria-valuemax="100" aria-valuenow="82"><i></i></div>
             </div>
             <div class="stat" data-stat="health">
               <div class="stat-heading"><span><i class="stat-icon health-icon">＋</i>건강</span><strong id="healthValue">100</strong></div>
@@ -143,7 +149,7 @@
           <div class="growth-wrap">
             <div class="growth-copy">
               <span>성장</span>
-              <strong id="growthCopy">알이 깨어날 준비 중</strong>
+              <strong id="growthCopy">새싹을 틔울 준비 중</strong>
             </div>
             <div class="growth-track" id="growthTrack" role="progressbar" aria-label="성장도" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="growthFill"></i></div>
           </div>
@@ -159,25 +165,25 @@
           </div>
 
           <div class="action-grid" id="actionGrid">
-            <button class="action-button action-feed" data-action="feed" type="button">
-              <span class="action-art" aria-hidden="true">◒</span>
-              <span><strong>먹이</strong><small>든든하게</small></span>
+            <button class="action-button action-water" data-action="water" type="button">
+              <span class="action-art" aria-hidden="true">●</span>
+              <span><strong>물 주기</strong><small>촉촉하게</small></span>
             </button>
-            <button class="action-button action-play" data-action="play" type="button">
-              <span class="action-art" aria-hidden="true">☆</span>
-              <span><strong>놀기</strong><small>간식 받기</small></span>
+            <button class="action-button action-sun" data-action="sun" type="button">
+              <span class="action-art" aria-hidden="true">☀</span>
+              <span><strong>햇빛 받기</strong><small>햇살 모으기</small></span>
             </button>
-            <button class="action-button action-clean" data-action="clean" type="button">
-              <span class="action-art" aria-hidden="true">◌</span>
-              <span><strong>씻기</strong><small>뽀득뽀득</small></span>
+            <button class="action-button action-soil" data-action="soil" type="button">
+              <span class="action-art" aria-hidden="true">◆</span>
+              <span><strong>흙 돌보기</strong><small>영양 듬뿍</small></span>
             </button>
-            <button class="action-button action-sleep" data-action="sleep" type="button">
-              <span class="action-art" aria-hidden="true">☾</span>
-              <span><strong id="sleepActionTitle">재우기</strong><small id="sleepActionHint">포근한 꿈</small></span>
+            <button class="action-button action-music" data-action="music" type="button">
+              <span class="action-art" aria-hidden="true">♫</span>
+              <span><strong>음악 들려주기</strong><small>생기 가득</small></span>
             </button>
-            <button class="action-button action-medicine" data-action="medicine" type="button">
+            <button class="action-button action-tonic" data-action="tonic" type="button">
               <span class="action-art" aria-hidden="true">＋</span>
-              <span><strong>치료</strong><small>아플 때만</small></span>
+              <span><strong>영양제</strong><small>시들 때 회복</small></span>
             </button>
           </div>
           <p class="action-hint" id="actionHint" aria-live="polite">천천히, 필요한 돌봄을 골라 주세요.</p>
@@ -194,14 +200,14 @@
 
   <dialog class="soft-dialog welcome-dialog" id="welcomeDialog" aria-labelledby="welcomeTitle">
     <form id="welcomeForm">
-      <div class="welcome-egg" aria-hidden="true"><i></i><i></i><i></i></div>
-      <p class="eyebrow">새로운 만남</p>
-      <h2 id="welcomeTitle">알에서 작은 소리가 들려요</h2>
-      <p>곧 태어날 신비한 친구에게 예쁜 이름을 선물해 주세요.</p>
-      <label for="nameInput">친구 이름</label>
-      <input id="nameInput" name="petName" type="text" maxlength="10" autocomplete="off" placeholder="예: 몽실이" required>
+      <div class="welcome-seed" aria-hidden="true"><i></i><i></i><i></i></div>
+      <p class="eyebrow">새로운 정원</p>
+      <h2 id="welcomeTitle">작은 씨앗이 기다리고 있어요</h2>
+      <p>정성껏 돌보면 새싹과 나무, 꽃을 지나 특별한 열매를 맺을 거예요.</p>
+      <label for="nameInput">식물 이름</label>
+      <input id="nameInput" name="plantName" type="text" maxlength="10" autocomplete="off" placeholder="예: 초롱이" required>
       <p class="input-error" id="nameError" aria-live="polite"></p>
-      <button class="primary-button" type="submit">알 깨우기 <span aria-hidden="true">→</span></button>
+      <button class="primary-button" type="submit">씨앗 심기 <span aria-hidden="true">→</span></button>
     </form>
   </dialog>
 
@@ -216,10 +222,10 @@
     </div>
     <div class="setting-row">
       <span><strong>함께한 시간</strong><small id="settingsAge">방금 만남</small></span>
-      <span class="setting-value" id="settingsStage">신비한 알</span>
+      <span class="setting-value" id="settingsStage">작은 씨앗</span>
     </div>
     <div class="danger-zone">
-      <div><strong>새 알로 다시 시작</strong><small>현재 성장 기록은 되돌릴 수 없어요.</small></div>
+      <div><strong>새 씨앗으로 다시 시작</strong><small>현재 성장 기록은 되돌릴 수 없어요.</small></div>
       <button class="danger-button" id="resetButton" type="button">초기화</button>
     </div>
   </dialog>
@@ -227,7 +233,7 @@
   <dialog class="soft-dialog offline-dialog" id="offlineDialog" aria-labelledby="offlineTitle">
     <div class="offline-icon" aria-hidden="true">☁</div>
     <p class="eyebrow">다시 만나서 반가워요</p>
-    <h2 id="offlineTitle">그동안 잘 지냈을까요?</h2>
+    <h2 id="offlineTitle">그동안 정원은 어땠을까요?</h2>
     <p id="offlineSummary">잠시 자리를 비운 동안의 변화예요.</p>
     <div class="offline-changes" id="offlineChanges"></div>
     <button class="primary-button" id="offlineClose" type="button">확인하러 가기</button>
@@ -236,16 +242,16 @@
   <dialog class="minigame-dialog" id="minigameDialog" aria-labelledby="minigameTitle">
     <div class="minigame-shell">
       <div class="minigame-header">
-        <div><p class="eyebrow">놀아주기</p><h2 id="minigameTitle">별간식 받기</h2></div>
+        <div><p class="eyebrow">햇빛 받기</p><h2 id="minigameTitle">햇살방울 모으기</h2></div>
         <div class="game-score"><span>점수</span><strong id="gameScore">0</strong></div>
         <div class="game-time"><span>남은 시간</span><strong id="gameTime">30</strong></div>
       </div>
       <div class="canvas-wrap" id="canvasWrap">
-        <canvas id="gameCanvas" aria-label="떨어지는 간식을 받는 게임"></canvas>
+        <canvas id="gameCanvas" aria-label="떨어지는 햇살방울을 받는 게임"></canvas>
         <div class="game-countdown" id="gameCountdown" aria-live="assertive">3</div>
       </div>
       <div class="minigame-footer">
-        <p><span aria-hidden="true">← →</span> 방향키 또는 화면을 움직여 간식을 받아요</p>
+        <p><span aria-hidden="true">← →</span> 방향키 또는 화면을 움직여 햇살을 받아요</p>
         <button class="ghost-button" id="quitGameButton" type="button">그만하기</button>
       </div>
     </div>
