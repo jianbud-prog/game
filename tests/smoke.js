@@ -8,7 +8,7 @@ const vm = require("node:vm");
 const root = path.resolve(__dirname, "..");
 const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const gameSource = fs.readFileSync(path.join(root, "game.js"), "utf8");
-const SAVE_KEY = "mongle-egg-forest-save-v1";
+const SAVE_KEY = "cozy-little-garden-save-v2";
 
 class FakeClassList {
   constructor() {
@@ -39,6 +39,7 @@ class FakeCanvasContext {
   arc() {}
   lineTo() {}
   roundRect() {}
+  moveTo() {}
   fill() {}
   stroke() {}
   save() {}
@@ -93,7 +94,7 @@ class MemoryStorage {
 function makeDocument() {
   const ids = [...html.matchAll(/id="([^"]+)"/g)].map((match) => match[1]);
   const elements = new Map(ids.map((id) => [id, new FakeElement(id)]));
-  const actions = ["feed", "play", "clean", "sleep", "medicine"].map((action) => {
+  const actions = ["water", "sun", "soil", "music", "tonic"].map((action) => {
     const button = new FakeElement(`action-${action}`);
     button.dataset.action = action;
     return button;
@@ -116,7 +117,7 @@ function makeDocument() {
   return { document, elements, actions };
 }
 
-const STAT_IDS = ["fullness", "happiness", "cleanliness", "energy", "health"];
+const STAT_IDS = ["water", "sunlight", "nutrients", "vitality", "health"];
 
 function runGame(storage, clockRef) {
   const { document, elements, actions } = makeDocument();
@@ -158,85 +159,111 @@ app.elements.get("nameInput").value = "몽실이";
 app.elements.get("welcomeForm").listeners.submit({ preventDefault() {} });
 
 let saved = JSON.parse(storage.getItem(SAVE_KEY));
-assert.equal(saved.pet.name, "몽실이");
-assert.equal(saved.pet.stage, "egg");
-assert.equal(saved.stats.fullness, 82);
+assert.equal(saved.plant.name, "몽실이");
+assert.equal(saved.plant.stage, "seed");
+assert.equal(saved.stats.water, 82);
 
 clock.value += 2_000;
-clickAction(app, "feed");
+clickAction(app, "water");
 saved = JSON.parse(storage.getItem(SAVE_KEY));
-assert.equal(saved.stats.fullness, 100);
-assert.equal(saved.counters.feed, 1);
-assert.equal(saved.pet.xp, 5);
+assert.equal(saved.stats.water, 100);
+assert.equal(saved.counters.water, 1);
+assert.equal(saved.plant.xp, 5);
 
 clock.value += 2_000;
-clickAction(app, "sleep");
+clickAction(app, "music");
 saved = JSON.parse(storage.getItem(SAVE_KEY));
-assert.equal(saved.pet.isSleeping, true);
-assert.equal(app.actions.find((item) => item.dataset.action === "feed").disabled, true);
-
-clock.value += 2_000;
-clickAction(app, "sleep");
-saved = JSON.parse(storage.getItem(SAVE_KEY));
-assert.equal(saved.pet.isSleeping, false);
+assert.equal(saved.stats.vitality, 100);
+assert.equal(saved.counters.music, 1);
 
 clock.value += 10_000;
-clickAction(app, "clean");
+clickAction(app, "soil");
 saved = JSON.parse(storage.getItem(SAVE_KEY));
-assert.equal(saved.pet.stage, "baby", "충분한 시간이 지나면 알에서 부화한다");
+assert.equal(saved.plant.stage, "sprout", "충분한 시간이 지나면 씨앗이 새싹을 틔운다");
 
 clock.value += 2_000;
-clickAction(app, "play");
-assert.equal(app.elements.get("minigameDialog").open, true, "놀기는 미니게임을 연다");
+clickAction(app, "sun");
+assert.equal(app.elements.get("minigameDialog").open, true, "햇빛 받기는 미니게임을 연다");
 app.elements.get("quitGameButton").listeners.click();
 saved = JSON.parse(storage.getItem(SAVE_KEY));
-assert.equal(saved.counters.play, 1);
-assert.equal(saved.stats.energy, 72);
+assert.equal(saved.counters.sun, 1);
+assert.equal(saved.stats.sunlight, 88);
+assert.equal(saved.stats.water, 90);
 
 app.elements.get("soundButton").listeners.click();
 saved = JSON.parse(storage.getItem(SAVE_KEY));
 assert.equal(saved.settings.muted, true, "음소거 설정을 저장한다");
 
-const beforeOffline = saved.stats.fullness;
+const beforeOffline = saved.stats.water;
 clock.value += 6 * 60 * 60 * 1_000;
 runGame(storage, clock);
 saved = JSON.parse(storage.getItem(SAVE_KEY));
-assert.ok(saved.stats.fullness < beforeOffline, "오프라인 경과 시간만큼 상태가 감소한다");
-assert.ok(saved.stats.fullness >= 0 && saved.stats.health >= 0, "상태값은 0 아래로 내려가지 않는다");
+assert.ok(saved.stats.water < beforeOffline, "오프라인 경과 시간만큼 수분이 감소한다");
+assert.ok(saved.stats.water >= 0 && saved.stats.health >= 0, "상태값은 0 아래로 내려가지 않는다");
 
 const oddSeed = JSON.parse(storage.getItem(SAVE_KEY));
-oddSeed.pet.stage = "egg";
-oddSeed.pet.birthAt = clock.value + 7 * 24 * 60 * 60 * 1_000;
-oddSeed.stats.happiness = "not-a-number";
+oddSeed.plant.stage = "seed";
+oddSeed.plant.plantedAt = clock.value + 7 * 24 * 60 * 60 * 1_000;
+oddSeed.stats.sunlight = "not-a-number";
 oddSeed.lastSeen = clock.value + 7 * 24 * 60 * 60 * 1_000;
 const oddStorage = new MemoryStorage({ [SAVE_KEY]: JSON.stringify(oddSeed) });
 runGame(oddStorage, clock);
 const repairedOddSave = JSON.parse(oddStorage.getItem(SAVE_KEY));
-assert.equal(repairedOddSave.pet.birthAt, clock.value, "미래의 탄생 시각을 현재 시각으로 보정한다");
-assert.equal(repairedOddSave.stats.happiness, 82, "잘못된 상태값은 안전한 기본값으로 복구한다");
+assert.equal(repairedOddSave.plant.plantedAt, clock.value, "미래의 식재 시각을 현재 시각으로 보정한다");
+assert.equal(repairedOddSave.stats.sunlight, 82, "잘못된 상태값은 안전한 기본값으로 복구한다");
 
-function assertAdultForm(counters, expected) {
+function assertFruitForm(counters, expected) {
   const seeded = JSON.parse(storage.getItem(SAVE_KEY));
-  seeded.pet.stage = "child";
-  seeded.pet.form = null;
-  seeded.pet.xp = 90;
-  seeded.pet.isSick = false;
-  seeded.stats = { fullness: 80, happiness: 80, cleanliness: 80, energy: 80, health: 90 };
-  seeded.counters = { medicine: 0, ...counters };
+  seeded.plant.stage = "flower";
+  seeded.plant.form = null;
+  seeded.plant.xp = 150;
+  seeded.plant.isSick = false;
+  seeded.stats = { water: 80, sunlight: 80, nutrients: 80, vitality: 80, health: 90 };
+  seeded.counters = { tonic: 0, ...counters };
   seeded.lastSeen = clock.value;
   const formStorage = new MemoryStorage({ [SAVE_KEY]: JSON.stringify(seeded) });
   runGame(formStorage, clock);
   const result = JSON.parse(formStorage.getItem(SAVE_KEY));
-  assert.equal(result.pet.stage, "adult");
-  assert.equal(result.pet.form, expected);
+  assert.equal(result.plant.stage, "fruit");
+  assert.equal(result.plant.form, expected);
 }
 
-assertAdultForm({ feed: 3, play: 3, clean: 3, sleep: 1 }, "balanced");
-assertAdultForm({ feed: 1, play: 8, clean: 1, sleep: 0 }, "active");
-assertAdultForm({ feed: 8, play: 1, clean: 2, sleep: 4 }, "cozy");
+assertFruitForm({ water: 3, sun: 3, soil: 3, music: 3 }, "balanced");
+assertFruitForm({ water: 1, sun: 8, soil: 1, music: 1 }, "sunny");
+assertFruitForm({ water: 8, sun: 1, soil: 4, music: 1 }, "dewy");
+
+function assertGrowthStage(startStage, xp, expectedStage) {
+  const seeded = JSON.parse(storage.getItem(SAVE_KEY));
+  seeded.plant.stage = startStage;
+  seeded.plant.form = null;
+  seeded.plant.xp = xp;
+  seeded.plant.isSick = false;
+  seeded.stats = { water: 80, sunlight: 80, nutrients: 80, vitality: 80, health: 90 };
+  seeded.lastSeen = clock.value;
+  const stageStorage = new MemoryStorage({ [SAVE_KEY]: JSON.stringify(seeded) });
+  runGame(stageStorage, clock);
+  assert.equal(JSON.parse(stageStorage.getItem(SAVE_KEY)).plant.stage, expectedStage);
+}
+
+assertGrowthStage("sprout", 35, "tree");
+assertGrowthStage("tree", 90, "flower");
+
+const sickSeed = JSON.parse(storage.getItem(SAVE_KEY));
+sickSeed.plant.stage = "sprout";
+sickSeed.plant.xp = 10;
+sickSeed.plant.isSick = true;
+sickSeed.stats = { water: 80, sunlight: 80, nutrients: 80, vitality: 80, health: 35 };
+sickSeed.lastSeen = clock.value;
+const sickStorage = new MemoryStorage({ [SAVE_KEY]: JSON.stringify(sickSeed) });
+const sickApp = runGame(sickStorage, clock);
+clock.value += 2_000;
+clickAction(sickApp, "tonic");
+const recoveredPlant = JSON.parse(sickStorage.getItem(SAVE_KEY));
+assert.equal(recoveredPlant.plant.isSick, false, "영양제로 시든 식물을 회복한다");
+assert.equal(recoveredPlant.stats.health, 65);
 
 const brokenStorage = new MemoryStorage({ [SAVE_KEY]: "{broken" });
 const recovered = runGame(brokenStorage, clock);
 assert.equal(recovered.elements.get("welcomeDialog").open, true, "손상된 저장 데이터는 새 게임으로 복구한다");
 
-console.log("Smoke tests passed: new game, care, sleep, hatch, minigame, save, offline progress, evolutions, recovery.");
+console.log("Smoke tests passed: planting, care, sprouting, sunlight game, save, offline progress, fruit forms, recovery.");
