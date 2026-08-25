@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#8ccca5">
-  <meta name="description" content="작은 씨앗을 돌보며 새싹, 나무, 꽃과 열매로 성장시키는 오프라인 식물 다마고치 게임">
-  <title>포근포근 작은 정원</title>
+  <meta name="description" content="실제 날씨와 스마트팜 생육 기록으로 방울토마토 한 시즌을 운영하는 데이터 성장 게임">
+  <title>토마토 데이터 리그</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -14,11 +14,11 @@
 
   <main class="app-shell">
     <header class="topbar">
-      <a class="brand" href="#game" aria-label="포근포근 작은 정원 홈">
+      <a class="brand" href="#game" aria-label="토마토 데이터 리그 홈">
         <span class="brand-mark" aria-hidden="true">♧</span>
         <span>
-          <strong>포근포근 작은 정원</strong>
-          <small>나만의 반려 식물</small>
+          <strong>토마토 데이터 리그</strong>
+          <small>실제 데이터로 키우는 한 시즌</small>
         </span>
       </a>
       <div class="header-actions">
@@ -30,6 +30,86 @@
         </button>
       </div>
     </header>
+
+    <section class="weather-card" id="weatherCard" aria-labelledby="weatherTitle">
+      <div class="weather-main">
+        <span class="weather-symbol" id="weatherIcon" aria-hidden="true">⌁</span>
+        <div>
+          <p class="eyebrow" id="weatherTitle">실시간 정원 날씨</p>
+          <button class="location-button" id="locationButton" type="button" aria-label="날씨 지역 바꾸기">
+            <strong id="weatherLocation">서울</strong><span aria-hidden="true">⌄</span>
+          </button>
+        </div>
+        <strong class="weather-temperature" id="weatherTemperature">--°</strong>
+        <span class="weather-condition" id="weatherCondition">연결 중</span>
+      </div>
+      <dl class="weather-metrics">
+        <div><dt>습도</dt><dd id="weatherHumidity">--%</dd></div>
+        <div><dt>강수</dt><dd id="weatherRain">-- mm</dd></div>
+        <div><dt>최고 / 최저</dt><dd id="weatherRange">--° / --°</dd></div>
+        <div><dt>해 뜨고 지는 시각</dt><dd id="weatherSunTime">--:-- / --:--</dd></div>
+      </dl>
+      <div class="weather-impact">
+        <span>오늘의 성장 환경</span>
+        <strong id="weatherEffect">날씨를 확인하고 있어요</strong>
+        <small id="weatherUpdated">아직 갱신되지 않음</small>
+      </div>
+      <button class="weather-refresh" id="weatherRefresh" type="button" aria-label="날씨 새로고침" title="날씨 새로고침">↻</button>
+    </section>
+
+    <section class="league-card" id="leagueCard" aria-labelledby="leagueTitle">
+      <header class="league-header">
+        <div>
+          <p class="eyebrow">스마트팜 데이터 리그</p>
+          <h2 id="leagueTitle">실제 농가 기록에 도전하기</h2>
+          <p class="league-subtitle"><strong id="seasonWeek">2주차</strong> · 영농 <strong id="seasonDay">1일</strong> · 공개 방울토마토 중앙값 비교</p>
+        </div>
+        <div class="league-grade" id="leagueGrade" aria-label="시즌 등급 B">
+          <span>시즌 등급</span><strong>B</strong><small id="leaguePercentile">상위 50% 예상</small>
+        </div>
+      </header>
+
+      <div class="league-layout">
+        <section class="coach-panel" aria-labelledby="coachTitle">
+          <div class="coach-heading">
+            <span class="coach-avatar" aria-hidden="true">♧</span>
+            <div><p class="eyebrow">오늘의 코치 브리핑</p><h3 id="coachTitle">환경을 분석하고 있어요</h3></div>
+          </div>
+          <p class="coach-copy" id="coachCopy">실제 날씨와 식물 상태를 조합해 오늘의 운영 포인트를 알려 드려요.</p>
+          <div class="factor-grid" aria-label="오늘의 성장 요인">
+            <div><span>온도</span><strong id="factorTemperature">--</strong><small id="factorTemperatureDetail">20–27°C 적정</small></div>
+            <div><span>광량</span><strong id="factorLight">--</strong><small id="factorLightDetail">날씨 데이터</small></div>
+            <div><span>수분</span><strong id="factorWater">--</strong><small id="factorWaterDetail">관수 상태</small></div>
+            <div><span>토양</span><strong id="factorSoil">--</strong><small id="factorSoilDetail">pH 5.5–6.8 적정</small></div>
+          </div>
+        </section>
+
+        <section class="strategy-panel" aria-labelledby="strategyTitle">
+          <div class="strategy-heading"><p class="eyebrow">오늘의 한 수</p><h3 id="strategyTitle">운영 전략 선택</h3></div>
+          <div class="strategy-grid" id="strategyGrid" role="radiogroup" aria-label="오늘의 온실 운영 전략">
+            <button type="button" data-strategy="balanced" role="radio" aria-checked="true"><span>⚖</span><strong>균형 관리</strong><small>고른 기본 운영</small></button>
+            <button type="button" data-strategy="irrigate" role="radio" aria-checked="false"><span>●</span><strong>관수 강화</strong><small>고온·건조 대응</small></button>
+            <button type="button" data-strategy="ventilate" role="radio" aria-checked="false"><span>≋</span><strong>환기 강화</strong><small>고온·다습 대응</small></button>
+            <button type="button" data-strategy="shade" role="radio" aria-checked="false"><span>◐</span><strong>차광 관리</strong><small>강한 일사 대응</small></button>
+          </div>
+          <button class="close-day-button" id="closeDayButton" type="button"><span>오늘 운영 마감</span><small>실제 환경으로 생육 결과 계산</small><b aria-hidden="true">→</b></button>
+          <p class="strategy-hint" id="strategyHint">돌봄과 전략을 마치면 영농일을 진행하세요.</p>
+        </section>
+      </div>
+
+      <section class="benchmark-panel" aria-labelledby="benchmarkTitle">
+        <div class="benchmark-heading">
+          <div><p class="eyebrow">스마트팜 공개데이터</p><h3 id="benchmarkTitle">현장 농가 중앙값과 내 기록</h3></div>
+          <p id="benchmarkNote">같은 생육 주차의 실제 측정값과 비교합니다.</p>
+        </div>
+        <div class="benchmark-grid">
+          <div class="benchmark-metric"><span>줄기 굵기</span><strong><b id="myStem">2.0</b> mm</strong><small>농가 <em id="farmStem">2.0 mm</em></small><i><b id="barStem"></b></i></div>
+          <div class="benchmark-metric"><span>잎 수</span><strong><b id="myLeaves">6</b> 장</strong><small>농가 <em id="farmLeaves">6장</em></small><i><b id="barLeaves"></b></i></div>
+          <div class="benchmark-metric"><span>꽃·착과 화방</span><strong><b id="myFlowers">0</b> 단</strong><small>농가 <em id="farmFlowers">0단</em></small><i><b id="barFlowers"></b></i></div>
+          <div class="benchmark-metric"><span>열매 수</span><strong><b id="myFruits">0</b> 개</strong><small>농가 <em id="farmFruits">0개</em></small><i><b id="barFruits"></b></i></div>
+        </div>
+      </section>
+    </section>
 
     <section class="dashboard" id="game" aria-label="반려 식물 돌보기">
       <section class="scene-card" aria-label="반려 식물의 온실">
@@ -117,11 +197,17 @@
         <section class="status-card">
           <div class="section-title-row">
             <div>
-              <p class="eyebrow">오늘의 정원</p>
-              <h2>상태 살피기</h2>
+              <p class="eyebrow">오늘의 온실</p>
+              <h2>생육 상태</h2>
             </div>
             <div class="mood-orb" id="moodOrb" aria-label="기분 좋음"><span id="moodFace">⌣</span></div>
           </div>
+
+          <a class="species-profile" id="speciesLink" href="https://www.gbif.org/species/9206251" target="_blank" rel="noopener noreferrer">
+            <span class="species-mark" id="speciesMark" aria-hidden="true">🌻</span>
+            <span><strong id="speciesName">해바라기</strong><em id="speciesScientific">Helianthus annuus L.</em></span>
+            <small id="speciesFamily">국화과 · GBIF</small>
+          </a>
 
           <div class="stats" id="stats">
             <div class="stat" data-stat="water">
@@ -192,7 +278,8 @@
     </section>
 
     <footer class="footer-note">
-      <span>자동 저장됨</span><i aria-hidden="true"></i><span>인터넷 없이도 놀 수 있어요</span>
+      <span>자동 저장됨</span><i aria-hidden="true"></i><span>오프라인에서도 저장된 데이터로 계속해요</span>
+      <i aria-hidden="true"></i><span class="data-credit">날씨 <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a> · 생육 <a href="https://www.data.go.kr/data/15090553/fileData.do?recommendDataYn=Y" target="_blank" rel="noopener noreferrer">농정원</a> · 적정환경 <a href="https://ecocrop.apps.fao.org/ecocrop/srv/en/dataSheet?id=1379" target="_blank" rel="noopener noreferrer">FAO</a> · 토양 <a href="https://rest.isric.org/soilgrids/v2.0/docs" target="_blank" rel="noopener noreferrer">SoilGrids</a></span>
     </footer>
   </main>
 
@@ -201,14 +288,29 @@
   <dialog class="soft-dialog welcome-dialog" id="welcomeDialog" aria-labelledby="welcomeTitle">
     <form id="welcomeForm">
       <div class="welcome-seed" aria-hidden="true"><i></i><i></i><i></i></div>
-      <p class="eyebrow">새로운 정원</p>
-      <h2 id="welcomeTitle">작은 씨앗이 기다리고 있어요</h2>
-      <p>정성껏 돌보면 새싹과 나무, 꽃을 지나 특별한 열매를 맺을 거예요.</p>
+      <p class="eyebrow">2026 데이터 리그</p>
+      <h2 id="welcomeTitle">방울토마토 구단주가 되어 보세요</h2>
+      <p>실제 날씨를 읽고 매일 전략을 선택해, 현장 농가의 주차별 생육 기록에 도전합니다.</p>
+      <fieldset class="species-picker">
+        <legend>이번 시즌 출전 작물</legend>
+        <label><input type="radio" name="species" value="tomato" checked><span><b>🍅</b><strong>방울토마토</strong><small>실제 농가 생육 데이터 연결</small></span></label>
+      </fieldset>
       <label for="nameInput">식물 이름</label>
       <input id="nameInput" name="plantName" type="text" maxlength="10" autocomplete="off" placeholder="예: 초롱이" required>
       <p class="input-error" id="nameError" aria-live="polite"></p>
       <button class="primary-button" type="submit">씨앗 심기 <span aria-hidden="true">→</span></button>
     </form>
+  </dialog>
+
+  <dialog class="soft-dialog day-report-dialog" id="dayReportDialog" aria-labelledby="dayReportTitle">
+    <div class="report-score" id="reportScore" aria-hidden="true">A</div>
+    <p class="eyebrow">영농일 결과 리포트</p>
+    <h2 id="dayReportTitle">좋은 하루를 운영했어요</h2>
+    <p id="dayReportSummary">오늘의 선택이 실제 환경과 잘 맞았어요.</p>
+    <div class="report-breakdown" id="reportBreakdown"></div>
+    <div class="report-change"><span>시즌 평점</span><strong id="reportRating">84점</strong><small id="reportWeek">3주차 진입</small></div>
+    <p class="report-tip" id="reportTip">내일도 가장 낮은 성장 요인을 먼저 보완해 보세요.</p>
+    <button class="primary-button" id="dayReportClose" type="button">다음 영농일 시작</button>
   </dialog>
 
   <dialog class="soft-dialog settings-dialog" id="settingsDialog" aria-labelledby="settingsTitle">
@@ -224,10 +326,30 @@
       <span><strong>함께한 시간</strong><small id="settingsAge">방금 만남</small></span>
       <span class="setting-value" id="settingsStage">작은 씨앗</span>
     </div>
+    <div class="setting-row">
+      <span><strong>실데이터 연결</strong><small id="settingsDataSource">서울 날씨 · 농정원 생육 · FAO 적정환경</small></span>
+      <button class="small-button" id="settingsLocationButton" type="button">지역 변경</button>
+    </div>
     <div class="danger-zone">
       <div><strong>새 씨앗으로 다시 시작</strong><small>현재 성장 기록은 되돌릴 수 없어요.</small></div>
       <button class="danger-button" id="resetButton" type="button">초기화</button>
     </div>
+  </dialog>
+
+  <dialog class="soft-dialog location-dialog" id="locationDialog" aria-labelledby="locationTitle">
+    <div class="dialog-header">
+      <div><p class="eyebrow">Open-Meteo</p><h2 id="locationTitle">정원 날씨 지역</h2></div>
+      <button class="dialog-close" id="locationClose" type="button" aria-label="지역 설정 닫기">×</button>
+    </div>
+    <p class="dialog-copy">도시 이름을 검색해 실제 날씨와 지역 토양을 영농일 생육 점수에 반영해 보세요.</p>
+    <form class="location-form" id="locationForm">
+      <label class="sr-only" for="locationInput">도시 이름</label>
+      <input id="locationInput" type="search" autocomplete="off" placeholder="예: 서울, 부산, Tokyo" required>
+      <button class="primary-button" type="submit">검색</button>
+    </form>
+    <p class="location-status" id="locationStatus" role="status" aria-live="polite"></p>
+    <div class="location-results" id="locationResults"></div>
+    <small class="privacy-note">위치 권한을 사용하지 않으며, 검색한 도시 이름만 Open-Meteo에 전송합니다.</small>
   </dialog>
 
   <dialog class="soft-dialog offline-dialog" id="offlineDialog" aria-labelledby="offlineTitle">
