@@ -173,6 +173,303 @@ button:disabled {
   align-items: stretch;
 }
 
+.weather-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(235px, 1.1fr) minmax(330px, 1.45fr) minmax(220px, 1fr);
+  gap: 20px;
+  align-items: center;
+  margin-bottom: 18px;
+  padding: 15px 54px 15px 18px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 24px;
+  box-shadow: var(--small-shadow);
+  backdrop-filter: blur(16px);
+}
+
+.weather-card::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 5px;
+  content: "";
+  background: linear-gradient(#86c8e3, #72be91);
+}
+
+.weather-main {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.weather-symbol {
+  display: grid;
+  width: 47px;
+  height: 47px;
+  place-items: center;
+  color: #fff;
+  font-size: 24px;
+  background: linear-gradient(145deg, #9bd9ef, #70b8dc);
+  border-radius: 16px;
+  box-shadow: inset 0 0 0 3px rgba(255,255,255,.35);
+}
+
+.location-button {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  padding: 0;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+}
+
+.location-button strong { font-size: 15px; }
+.location-button span { color: var(--muted); }
+.weather-temperature { font-size: 27px; letter-spacing: -.05em; }
+.weather-condition { grid-column: 2 / 4; margin-top: -9px; color: var(--muted); font-size: 10px; font-weight: 800; }
+
+.weather-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+  margin: 0;
+}
+
+.weather-metrics div {
+  min-width: 0;
+  padding: 9px 10px;
+  background: rgba(238, 247, 240, .78);
+  border-radius: 12px;
+}
+
+.weather-metrics dt { overflow: hidden; color: var(--muted); font-size: 8px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+.weather-metrics dd { margin: 4px 0 0; font-size: 10px; font-weight: 900; white-space: nowrap; }
+.weather-impact { min-width: 0; padding-left: 18px; border-left: 1px solid #e7e6df; }
+.weather-impact span, .weather-impact strong, .weather-impact small { display: block; }
+.weather-impact span { color: #718174; font-size: 9px; font-weight: 900; }
+.weather-impact strong { margin: 4px 0; font-size: 12px; line-height: 1.35; }
+.weather-impact small { overflow: hidden; color: var(--muted); font-size: 8px; text-overflow: ellipsis; white-space: nowrap; }
+
+.weather-refresh {
+  position: absolute;
+  top: 50%;
+  right: 15px;
+  display: grid;
+  width: 31px;
+  height: 31px;
+  place-items: center;
+  color: #5c8069;
+  cursor: pointer;
+  background: #eef6ef;
+  border: 0;
+  border-radius: 10px;
+  transform: translateY(-50%);
+}
+
+.weather-card.is-loading .weather-refresh { animation: weather-spin 900ms linear infinite; }
+
+.league-card {
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 18px;
+  padding: 22px;
+  background:
+    radial-gradient(circle at 92% 5%, rgba(246, 190, 104, .18), transparent 24%),
+    linear-gradient(145deg, #f8fbf4, #fffaf4 62%, #f6f0ea);
+  border: 1px solid rgba(255, 255, 255, .92);
+  border-radius: 28px;
+  box-shadow: var(--shadow);
+}
+
+.league-card::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 100%;
+  content: "";
+  background: linear-gradient(#5ba36b, #e4a34b);
+}
+
+.league-header,
+.benchmark-heading,
+.coach-heading,
+.strategy-heading {
+  display: flex;
+  align-items: center;
+}
+
+.league-header {
+  justify-content: space-between;
+  gap: 18px;
+  padding: 0 2px 18px 6px;
+}
+
+.league-header h2 { margin-top: 3px; font-size: 21px; }
+.league-subtitle { margin: 7px 0 0; color: var(--muted); font-size: 10px; font-weight: 750; }
+.league-subtitle strong { color: #477755; }
+
+.league-grade {
+  display: grid;
+  min-width: 112px;
+  padding: 10px 13px;
+  color: #fff;
+  text-align: center;
+  background: linear-gradient(135deg, #4b8f5c, #6cad74);
+  border: 2px solid rgba(255,255,255,.75);
+  border-radius: 18px;
+  box-shadow: 0 9px 20px rgba(68, 118, 76, .2);
+}
+
+.league-grade span { font-size: 8px; font-weight: 900; opacity: .78; }
+.league-grade strong { margin: -2px 0; font-size: 28px; line-height: 1; }
+.league-grade small { font-size: 7px; font-weight: 800; opacity: .8; }
+.league-grade.grade-s { background: linear-gradient(135deg, #a26722, #efb341); }
+.league-grade.grade-a { background: linear-gradient(135deg, #357962, #58ad79); }
+.league-grade.grade-c { background: linear-gradient(135deg, #65778d, #8998aa); }
+.league-grade.grade-d { background: linear-gradient(135deg, #915e67, #bd7c79); }
+
+.league-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.12fr) minmax(270px, .88fr);
+  gap: 13px;
+}
+
+.coach-panel,
+.strategy-panel,
+.benchmark-panel {
+  background: rgba(255, 255, 255, .78);
+  border: 1px solid #e9e8df;
+  border-radius: 20px;
+}
+
+.coach-panel,
+.strategy-panel { padding: 16px; }
+.coach-heading { gap: 10px; }
+.coach-heading h3,
+.strategy-heading h3,
+.benchmark-heading h3 { margin-top: 2px; font-size: 14px; }
+.coach-avatar { display: grid; width: 38px; height: 38px; flex: 0 0 38px; place-items: center; color: #fff; font-size: 21px; background: #69a873; border-radius: 14px; box-shadow: inset 0 -5px 0 rgba(0,0,0,.07); }
+.coach-copy { min-height: 34px; margin: 11px 0 13px; color: #625e62; font-size: 10px; font-weight: 750; line-height: 1.6; }
+
+.factor-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.factor-grid > div { min-width: 0; padding: 9px; background: #f6f6f0; border: 1px solid #ebebe3; border-radius: 13px; }
+.factor-grid span,
+.factor-grid strong,
+.factor-grid small { display: block; }
+.factor-grid span { color: var(--muted); font-size: 8px; font-weight: 900; }
+.factor-grid strong { margin: 2px 0; color: #4f7559; font-size: 16px; }
+.factor-grid small { overflow: hidden; color: #8a8584; font-size: 7px; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
+.factor-grid .factor-low strong { color: #b35e59; }
+.factor-grid .factor-mid strong { color: #a07432; }
+
+.strategy-heading { justify-content: space-between; }
+.strategy-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin-top: 11px; }
+.strategy-grid button {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  min-width: 0;
+  gap: 0 7px;
+  align-items: center;
+  padding: 8px;
+  color: #685f64;
+  text-align: left;
+  cursor: pointer;
+  background: #fff;
+  border: 1px solid #e8e4df;
+  border-radius: 12px;
+  transition: border-color 150ms ease, background 150ms ease, transform 150ms ease;
+}
+.strategy-grid button:hover { transform: translateY(-1px); }
+.strategy-grid button[aria-checked="true"] { color: #416e4c; background: #edf7e9; border-color: #77ae7c; box-shadow: 0 4px 11px rgba(73, 126, 79, .11); }
+.strategy-grid button > span { grid-row: 1 / 3; display: grid; width: 26px; height: 26px; place-items: center; font-size: 14px; background: #f2f0ea; border-radius: 9px; }
+.strategy-grid strong { overflow: hidden; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+.strategy-grid small { overflow: hidden; color: var(--muted); font-size: 7px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+
+.close-day-button {
+  position: relative;
+  display: grid;
+  width: 100%;
+  grid-template-columns: 1fr auto;
+  margin-top: 10px;
+  padding: 10px 42px 10px 12px;
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+  background: linear-gradient(135deg, #526c52, #76965b);
+  border: 0;
+  border-radius: 14px;
+  box-shadow: 0 8px 17px rgba(72, 102, 69, .2);
+}
+.close-day-button:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 10px 20px rgba(72, 102, 69, .26); }
+.close-day-button:disabled { cursor: wait; opacity: .55; }
+.close-day-button span { font-size: 11px; font-weight: 900; }
+.close-day-button small { grid-column: 1; margin-top: 2px; font-size: 7px; font-weight: 700; opacity: .75; }
+.close-day-button b { position: absolute; top: 50%; right: 15px; font-size: 18px; transform: translateY(-50%); }
+.strategy-hint { min-height: 12px; margin: 7px 0 0; color: var(--muted); font-size: 7px; font-weight: 750; text-align: center; }
+
+.benchmark-panel { margin-top: 13px; padding: 15px 16px 16px; }
+.benchmark-heading { justify-content: space-between; gap: 12px; }
+.benchmark-heading > p { max-width: 310px; margin: 0; color: var(--muted); font-size: 8px; font-weight: 750; text-align: right; }
+.benchmark-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
+.benchmark-metric { min-width: 0; padding: 10px; background: #f8f6f1; border-radius: 13px; }
+.benchmark-metric > span,
+.benchmark-metric > strong,
+.benchmark-metric > small { display: block; }
+.benchmark-metric > span { color: var(--muted); font-size: 8px; font-weight: 900; }
+.benchmark-metric > strong { margin: 3px 0 1px; color: #4c4a4e; font-size: 9px; }
+.benchmark-metric > strong b { font-size: 16px; }
+.benchmark-metric > small { color: #8d8784; font-size: 7px; font-weight: 750; }
+.benchmark-metric em { color: #5f8266; font-style: normal; font-weight: 900; }
+.benchmark-metric > i { display: block; overflow: hidden; height: 5px; margin-top: 7px; background: #e4e1d9; border-radius: 999px; }
+.benchmark-metric > i b { display: block; width: 0; height: 100%; background: linear-gradient(90deg, #6cae74, #e8b052); border-radius: inherit; transition: width 500ms ease; }
+
+.day-report-dialog { text-align: center; }
+.report-score { display: grid; width: 68px; height: 68px; margin: -55px auto 14px; place-items: center; color: #fff; font-size: 35px; font-weight: 950; background: linear-gradient(135deg, #45855a, #75b66c); border: 5px solid #fffaf7; border-radius: 24px; box-shadow: 0 12px 25px rgba(64, 101, 63, .28); transform: rotate(-3deg); }
+.day-report-dialog h2 { margin: 3px 0 7px; }
+.day-report-dialog > p:not(.eyebrow):not(.report-tip) { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.6; }
+.report-breakdown { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 16px 0 10px; }
+.report-breakdown div { padding: 9px 4px; background: #f4f4ed; border-radius: 12px; }
+.report-breakdown span,
+.report-breakdown strong { display: block; }
+.report-breakdown span { color: var(--muted); font-size: 7px; font-weight: 900; }
+.report-breakdown strong { margin-top: 2px; color: #52725b; font-size: 14px; }
+.report-change { display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto auto; padding: 12px; text-align: left; background: #edf6e9; border-radius: 14px; }
+.report-change span { color: #65806b; font-size: 8px; font-weight: 900; }
+.report-change strong { grid-row: 1 / 3; grid-column: 2; align-self: center; color: #42654c; font-size: 18px; }
+.report-change small { margin-top: 2px; color: #7c8e7f; font-size: 8px; font-weight: 750; }
+.report-tip { margin: 11px 0 15px; padding: 9px; color: #746c70; font-size: 9px; font-weight: 750; background: #fff2d9; border-radius: 12px; }
+
+.species-profile {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  margin: 14px 0 17px;
+  padding: 10px 12px;
+  color: inherit;
+  text-decoration: none;
+  background: linear-gradient(135deg, #f3f8ec, #fff9e8);
+  border: 1px solid #e6ecd8;
+  border-radius: 15px;
+}
+
+.species-profile:hover { border-color: #b8d5b4; transform: translateY(-1px); }
+.species-mark { display: grid; width: 36px; height: 36px; place-items: center; font-size: 21px; background: #fff; border-radius: 11px; }
+.species-profile strong, .species-profile em { display: block; }
+.species-profile strong { font-size: 11px; }
+.species-profile em { margin-top: 2px; overflow: hidden; color: var(--muted); font-size: 8px; text-overflow: ellipsis; white-space: nowrap; }
+.species-profile small { color: #5f8b6b; font-size: 8px; font-weight: 900; text-align: right; }
+
 .scene-card,
 .status-card,
 .actions-card {
@@ -1594,6 +1891,8 @@ h2 {
   border-radius: 50%;
 }
 
+.footer-note a { color: inherit; text-underline-offset: 2px; }
+
 .toast {
   position: fixed;
   z-index: 100;
@@ -1754,6 +2053,25 @@ dialog::backdrop {
   box-shadow: 0 0 0 4px rgba(231, 150, 172, 0.13);
 }
 
+.species-picker {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 0 0 16px;
+  padding: 0;
+  border: 0;
+}
+
+.species-picker legend { width: 100%; margin-bottom: 8px; color: #705f6e; font-size: 11px; font-weight: 900; text-align: left; }
+.welcome-dialog .species-picker label { margin: 0; }
+.species-picker input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.species-picker span { display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto; gap: 0 8px; align-items: center; padding: 9px; cursor: pointer; text-align: left; background: #fff; border: 2px solid #eee5df; border-radius: 13px; transition: border-color 150ms ease, transform 150ms ease; }
+.species-picker b { grid-row: 1 / 3; font-size: 21px; }
+.species-picker strong { font-size: 10px; }
+.species-picker small { color: var(--muted); font-size: 8px; }
+.species-picker input:checked + span { background: #f3f9ee; border-color: #75b784; box-shadow: 0 4px 13px rgba(91,145,103,.12); }
+.species-picker input:focus-visible + span { outline: 3px solid rgba(114, 84, 171, 0.38); outline-offset: 2px; }
+
 .input-error {
   min-height: 17px;
   margin: 5px 2px 2px;
@@ -1883,6 +2201,61 @@ dialog::backdrop {
   background: #eee7f6;
   border-radius: 9px;
 }
+
+.small-button {
+  flex: 0 0 auto;
+  padding: 8px 11px;
+  color: #49795a;
+  cursor: pointer;
+  background: #e8f4e9;
+  border: 0;
+  border-radius: 10px;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.location-dialog { width: min(510px, calc(100% - 30px)); }
+.dialog-copy { margin: -6px 0 17px; color: var(--muted); font-size: 11px; line-height: 1.6; }
+.location-form { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.location-form input { min-width: 0; padding: 0 13px; background: #fff; border: 2px solid #e2e9df; border-radius: 13px; }
+.location-form .primary-button { width: auto; min-height: 45px; padding: 0 20px; background: linear-gradient(135deg, #75bb88, #559c6d); }
+.location-status { min-height: 17px; margin: 9px 2px; color: var(--muted); font-size: 9px; }
+.location-results { display: grid; gap: 7px; max-height: 230px; overflow: auto; }
+.location-result { display: flex; justify-content: space-between; gap: 15px; align-items: center; width: 100%; padding: 11px 12px; cursor: pointer; text-align: left; background: #fff; border: 1px solid #e5e9e1; border-radius: 12px; }
+.location-result:hover { background: #f1f8f0; border-color: #a8cba9; }
+.location-result strong, .location-result small { display: block; }
+.location-result strong { font-size: 11px; }
+.location-result small { margin-top: 2px; color: var(--muted); font-size: 8px; }
+.location-result span:last-child { color: #64936f; font-size: 16px; }
+.privacy-note { display: block; margin-top: 16px; color: var(--muted); font-size: 8px; line-height: 1.5; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+/* 실시간 날씨가 온실 창과 빛의 분위기를 바꿉니다. */
+.room.weather-cloudy .window-sky { background: linear-gradient(#aabec8, #dce6e5 73%, #a9c7ad 73%); }
+.room.weather-cloudy .sun { opacity: .55; }
+.room.weather-rain .window-sky { background: repeating-linear-gradient(105deg, transparent 0 13px, rgba(255,255,255,.45) 14px 16px), linear-gradient(#819fab, #c5d9d9 73%, #91b09a 73%); background-size: 36px 100%, auto; animation: rain-window 850ms linear infinite; }
+.room.weather-rain .sun { display: none; }
+.room.weather-night { background: linear-gradient(180deg, #c9d7cc 0%, #e4dfcf 65%, #c5a985 65%, #b78d68 100%); }
+.room.weather-night .window-sky { background: radial-gradient(circle at 25% 25%, #fff 0 1px, transparent 2px), radial-gradient(circle at 70% 42%, #fff 0 1px, transparent 2px), linear-gradient(#253c62, #5c7692 73%, #496a58 73%); }
+.room.weather-night .sun { top: 17px; right: 19px; background: #fff3c8; box-shadow: 9px -5px 0 0 #354f70; }
+
+/* 종마다 꽃과 열매 색을 구분하며, 돌봄 기록은 기존 열매 형태 이름에 남습니다. */
+.plant.species-sunflower .plant-flower i { background: linear-gradient(#ffe778, #f3b72d); }
+.plant.species-sunflower .plant-flower b { background: #70452e; border-color: #a96c37; }
+.plant.stage-fruit.species-sunflower { --fruit-a: #f1c642; --fruit-b: #bd7b25; }
+.plant.species-strawberry .plant-flower i { background: linear-gradient(#fff, #f7e9ee); }
+.plant.species-strawberry .plant-flower b { background: #f2d04f; }
+.plant.stage-fruit.species-strawberry { --fruit-a: #f15e62; --fruit-b: #bd3346; }
+.plant.stage-fruit.species-strawberry .plant-fruit { border-radius: 50% 50% 67% 67% / 44% 44% 82% 82%; }
+.plant.species-tomato .plant-flower i { background: linear-gradient(#ffe975, #f3b62f); }
+.plant.stage-fruit.species-tomato { --fruit-a: #f2684e; --fruit-b: #c93232; }
+.plant.stage-fruit.species-tomato .plant-fruit { border-radius: 50%; }
+.plant.species-apple .plant-flower i { background: linear-gradient(#fff8f6, #f2aab7); }
+.plant.stage-fruit.species-apple { --fruit-a: #e95d57; --fruit-b: #ad3338; }
+.plant.stage-fruit.species-apple .plant-fruit { border-radius: 50% 50% 48% 48% / 43% 43% 57% 57%; }
+
+@keyframes weather-spin { to { transform: translateY(-50%) rotate(360deg); } }
+@keyframes rain-window { to { background-position: 36px 0, 0 0; } }
 
 .danger-zone {
   display: flex;
@@ -2173,6 +2546,12 @@ dialog::backdrop {
     grid-template-columns: 1fr;
   }
 
+  .league-layout { grid-template-columns: 1fr; }
+  .factor-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+  .weather-card { grid-template-columns: minmax(220px, .8fr) 1.2fr; }
+  .weather-impact { grid-column: 1 / -1; padding: 11px 0 0; border-top: 1px solid #e7e6df; border-left: 0; }
+
   .care-panel {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -2192,6 +2571,31 @@ dialog::backdrop {
   .topbar {
     margin-bottom: 10px;
   }
+
+  .weather-card { grid-template-columns: 1fr; gap: 11px; margin-bottom: 10px; padding: 13px 47px 13px 13px; border-radius: 19px; }
+  .weather-metrics { grid-template-columns: 1fr 1fr; }
+  .weather-impact { grid-column: auto; }
+  .weather-refresh { right: 10px; }
+  .weather-condition { grid-column: 2 / 4; }
+  .footer-note { flex-wrap: wrap; }
+  .data-credit { flex-basis: 100%; text-align: center; }
+  .footer-note i:nth-of-type(2) { display: none; }
+
+  .league-card { margin-bottom: 10px; padding: 16px 14px 14px 18px; border-radius: 22px; }
+  .league-header { align-items: flex-start; padding-bottom: 13px; }
+  .league-header h2 { font-size: 17px; }
+  .league-subtitle { max-width: 220px; line-height: 1.45; }
+  .league-grade { min-width: 88px; padding: 8px; }
+  .league-grade strong { font-size: 24px; }
+  .league-layout { gap: 9px; }
+  .coach-panel, .strategy-panel { padding: 13px; }
+  .factor-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .strategy-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .benchmark-panel { margin-top: 9px; padding: 13px; }
+  .benchmark-heading { align-items: flex-end; }
+  .benchmark-heading > p { max-width: 140px; }
+  .benchmark-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .report-breakdown { grid-template-columns: repeat(2, 1fr); }
 
   .brand small {
     display: none;
@@ -2319,6 +2723,18 @@ dialog::backdrop {
   .stats {
     grid-template-columns: 1fr;
   }
+
+  .species-profile { grid-template-columns: auto 1fr; }
+  .species-profile small { grid-column: 2; text-align: left; }
+  .species-picker { grid-template-columns: 1fr; }
+
+  .league-header { gap: 7px; }
+  .league-grade { min-width: 76px; }
+  .league-grade small { display: none; }
+  .league-subtitle { max-width: 190px; }
+  .strategy-grid button { padding: 7px 5px; }
+  .strategy-grid button > span { width: 23px; height: 23px; }
+  .benchmark-heading > p { display: none; }
 
   .stat:last-child {
     grid-column: auto;
